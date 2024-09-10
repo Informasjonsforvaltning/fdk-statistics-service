@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fdk-statistics-service
+  labels:
+    app: fdk-statistics-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fdk-statistics-service
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: fdk-statistics-service
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/prometheus"
+    spec:
+      containers:
+        - name: fdk-statistics-service
+          image: fdk-statistics-service
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            requests:
+              memory: 2Gi
