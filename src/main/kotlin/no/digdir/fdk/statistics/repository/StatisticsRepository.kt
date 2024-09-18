@@ -21,16 +21,18 @@ class StatisticsRepository(
         query(
             """WITH range AS (SELECT generate_series(:start,:end,:interval) AS date UNION SELECT :end),
                         latestForRange AS (
-                           SELECT DISTINCT ON (date, fdkId) *
-                           FROM statistics, range
-                           WHERE timestamp < date
-                           ORDER BY date, fdkId, timestamp DESC
+                          SELECT fdkId, date, MAX(id) AS latest_id
+                          FROM statistics, range
+                          WHERE timestamp < date
+                          GROUP BY fdkId, date
                         )
-                    SELECT date, count(id)
-                    FROM latestForRange
-                    WHERE removed = false
-                    GROUP BY date;
-                """.trimIndent(), mapOf("start" to start, "end" to end, "interval" to interval), rowMapper
+                SELECT r.date, COUNT(s.id)
+                FROM range r
+                JOIN latestForRange lfr ON lfr.date = r.date
+                JOIN statistics s ON s.id = lfr.latest_id
+                WHERE s.removed = false
+                GROUP BY r.date;
+            """.trimIndent(), mapOf("start" to start, "end" to end, "interval" to interval), rowMapper
         )
     }.filterNotNull()
 
