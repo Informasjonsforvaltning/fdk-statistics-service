@@ -4,10 +4,11 @@ import no.digdir.fdk.statistics.model.StatisticsObject
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
 
 @Component
-class StatisticsRepository(
+open class StatisticsRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
     private val rowMapper: (ResultSet, rowNum: Int) -> TimeSeriesPoint? = { rs, _ ->
@@ -17,7 +18,7 @@ class StatisticsRepository(
         )
     }
 
-    fun timeSeries(start: Long, end: Long, interval: Long): List<TimeSeriesPoint> = with(jdbcTemplate) {
+    open fun timeSeries(start: Long, end: Long, interval: Long): List<TimeSeriesPoint> = with(jdbcTemplate) {
         query(
             """WITH range AS (SELECT generate_series(:start,:end,:interval) AS date UNION SELECT :end),
                         latestForRange AS (
@@ -36,7 +37,8 @@ class StatisticsRepository(
         )
     }.filterNotNull()
 
-    fun store(statistics: StatisticsObject) = with(jdbcTemplate) {
+    @Transactional
+    open fun store(statistics: StatisticsObject) = with(jdbcTemplate) {
         update(
             """INSERT INTO statistics (id, fdkId, timestamp, removed, type, orgPath, isRelatedToTransportportal)
                     VALUES (:id, :fdkId, :timestamp, :removed, :type, :orgPath, :isRelatedToTransportportal)
