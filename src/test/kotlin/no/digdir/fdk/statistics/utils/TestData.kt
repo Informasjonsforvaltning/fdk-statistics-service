@@ -11,7 +11,6 @@ import no.digdir.fdk.statistics.model.Organization
 import no.digdir.fdk.statistics.model.Service
 import no.digdir.fdk.statistics.model.ServiceOrganization
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
-import java.time.LocalDate
 
 val CONCEPT_0 = Concept(publisher = Organization(orgPath = "/STAT/123456789"))
 val CONCEPT_1 = Concept(publisher = Organization(orgPath = "/PRIVAT/987654321"))
@@ -34,7 +33,7 @@ val SERVICE_1 =
     Service(ownedBy = listOf(ServiceOrganization(orgPath = "/PRIVAT/987654321")), hasCompetentAuthority = emptyList())
 
 val TIME_SERIES_REQUEST = TimeSeriesRequest(
-    start = LocalDate.of(2023, 6, 21),
-    end = LocalDate.of(2024, 1, 11),
+    start = "2023-06-11",
+    end = "2024-01-11",
     interval = Interval.MONTH
 )

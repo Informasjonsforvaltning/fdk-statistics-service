@@ -11,11 +11,23 @@ enum class Interval {
 }
 
 data class TimeSeriesRequest(
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonDeserialize(using = LocalDateDeserializer::class)
-    val start: LocalDate = LocalDate.of(2023, 1, 1),
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonDeserialize(using = LocalDateDeserializer::class)
-    val end: LocalDate = LocalDate.now(),
+    val start: String = LocalDate.now().minusYears(1).toString(),
+    val end: String = LocalDate.now().toString(),
     val interval: Interval = Interval.MONTH
+)
+
+data class RecalculateRequest(
+    @JsonSerialize(using = LocalDateSerializer::class)
+    @JsonDeserialize(using = LocalDateDeserializer::class)
+    val startInclusive: LocalDate,
+    @JsonSerialize(using = LocalDateSerializer::class)
+    @JsonDeserialize(using = LocalDateDeserializer::class)
+    val endExclusive: LocalDate
+)
+
+data class TimeSeriesPoint(
+    @JsonSerialize(using = LocalDateSerializer::class)
+    @JsonDeserialize(using = LocalDateDeserializer::class)
+    val date: LocalDate,
+    val count: Int,
 )

@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.HttpMethod.GET
+import org.springframework.http.HttpMethod.POST
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ContextConfiguration
 import java.time.LocalDate
@@ -30,27 +30,27 @@ class TimeSeriesTest : ApiTestContext() {
 
     @Test
     fun getTimeSeriesHandlesNullBody() {
-        val response = requestApi("/time-series", port, null, GET)
+        val response = requestApi("/time-series", port, null, POST)
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
-        assertTrue(result.size > 12)
+        assertTrue(result.size > 11)
     }
 
     @Test
     fun getTimeSeriesPeriodMonth() {
-        val response = requestApi("/time-series", port, mapper.writeValueAsString(TIME_SERIES_REQUEST), GET)
+        val response = requestApi("/time-series", port, mapper.writeValueAsString(TIME_SERIES_REQUEST), POST)
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val expected = listOf(
-            TimeSeriesPoint(dateMillis = 1687305600000, count = 1),
-            TimeSeriesPoint(dateMillis = 1689897600000, count = 4),
-            TimeSeriesPoint(dateMillis = 1692489600000, count = 5),
-            TimeSeriesPoint(dateMillis = 1695081600000, count = 7),
-            TimeSeriesPoint(dateMillis = 1697673600000, count = 9),
-            TimeSeriesPoint(dateMillis = 1700265600000, count = 11),
-            TimeSeriesPoint(dateMillis = 1702857600000, count = 12),
-            TimeSeriesPoint(dateMillis = 1704931200000, count = 12)
+            TimeSeriesPoint(date = LocalDate.of(2023, 6, 11), count = 2),
+            TimeSeriesPoint(date = LocalDate.of(2023, 7, 11), count = 3),
+            TimeSeriesPoint(date = LocalDate.of(2023, 8, 11), count = 6),
+            TimeSeriesPoint(date = LocalDate.of(2023, 9, 11), count = 7),
+            TimeSeriesPoint(date = LocalDate.of(2023, 10, 11), count = 10),
+            TimeSeriesPoint(date = LocalDate.of(2023, 11, 11), count = 11),
+            TimeSeriesPoint(date = LocalDate.of(2023, 12, 11), count = 12),
+            TimeSeriesPoint(date = LocalDate.of(2024, 1, 11), count = 12),
         )
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -63,12 +63,12 @@ class TimeSeriesTest : ApiTestContext() {
             "/time-series",
             port,
             mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.WEEK)),
-            GET
+            POST
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
-        assertTrue(result.size == 31)
+        assertEquals(31, result.size)
     }
 
     @Test
@@ -77,12 +77,12 @@ class TimeSeriesTest : ApiTestContext() {
             "/time-series",
             port,
             mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.DAY)),
-            GET
+            POST
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
-        assertTrue(result.size == 205)
+        assertEquals(215, result.size)
     }
 
     @Test
@@ -90,8 +90,8 @@ class TimeSeriesTest : ApiTestContext() {
         val response = requestApi(
             "/time-series",
             port,
-            mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(end = LocalDate.of(2010, 1, 1))),
-            GET
+            mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(end = "2010-01-01")),
+            POST
         )
         assertEquals(HttpStatus.BAD_REQUEST.value(), response["status"])
     }

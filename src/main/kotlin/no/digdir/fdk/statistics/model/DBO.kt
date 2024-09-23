@@ -1,6 +1,8 @@
 package no.digdir.fdk.statistics.model
 
-data class StatisticsObject(
+import java.time.LocalDate
+
+data class StatsData(
     val id: String,
     val fdkId: String,
     val timestamp: Long,
@@ -8,4 +10,10 @@ data class StatisticsObject(
     val type: ResourceType,
     val orgPath: String? = null,
     val isRelatedToTransportportal: Boolean = false,
+)
+
+data class LatestForDate(
+    val fdkId: String,
+    val calculatedForDate: LocalDate,
+    val statId: String
 )

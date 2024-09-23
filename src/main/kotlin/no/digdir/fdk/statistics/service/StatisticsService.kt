@@ -5,27 +5,26 @@ import no.digdir.fdk.statistics.model.DataService
 import no.digdir.fdk.statistics.model.Dataset
 import no.digdir.fdk.statistics.model.Event
 import no.digdir.fdk.statistics.model.InformationModel
-import no.digdir.fdk.statistics.model.Interval
+import no.digdir.fdk.statistics.model.LatestForDate
+import no.digdir.fdk.statistics.model.RecalculateRequest
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.model.Service
-import no.digdir.fdk.statistics.model.StatisticsObject
+import no.digdir.fdk.statistics.model.StatsData
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import no.digdir.fdk.statistics.repository.StatisticsRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ResponseStatusException
-import java.time.Duration
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.time.temporal.ChronoUnit
 
 @Component
 class StatisticsService(private val statisticsRepository: StatisticsRepository) {
 
     fun storeConceptStatistics(fdkId: String, concept: Concept, timestamp: Long) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -38,7 +37,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
 
     fun storeDataServiceStatistics(fdkId: String, dataService: DataService, timestamp: Long) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -51,7 +50,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
 
     fun storeDatasetStatistics(fdkId: String, dataset: Dataset, timestamp: Long) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -65,7 +64,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
 
     fun storeEventStatistics(fdkId: String, event: Event, timestamp: Long) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -78,7 +77,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
 
     fun storeInformationModelStatistics(fdkId: String, informationModel: InformationModel, timestamp: Long) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -95,7 +94,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         else null
 
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -108,7 +107,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
 
     fun markAsRemovedForTimestamp(fdkId: String, timestamp: Long, resourceType: ResourceType) {
         statisticsRepository.store(
-            StatisticsObject(
+            StatsData(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -119,25 +118,37 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    private fun Interval.toMillis(): Long =
-        when (this) {
-            Interval.DAY -> Duration.of(1, ChronoUnit.DAYS).toMillis()
-            Interval.WEEK -> Duration.of(7, ChronoUnit.DAYS).toMillis()
-            Interval.MONTH -> Duration.of(30, ChronoUnit.DAYS).toMillis()
-        }
+    fun recalculate(req: RecalculateRequest) {
+        req.startInclusive
+            .datesUntil(req.endExclusive)
+            .forEach { date -> calculateLatestForDate(date) }
+    }
 
     private fun LocalDate.toMillis(): Long =
         atStartOfDay()
             .toInstant(ZoneOffset.UTC)
             .toEpochMilli()
 
+    private fun calculateLatestForDate(date: LocalDate) {
+        statisticsRepository.latestForTimestamp(date.toMillis())
+            .forEach {
+                statisticsRepository.storeForDate(
+                    LatestForDate(
+                        fdkId = it.value,
+                        calculatedForDate = date,
+                        statId = it.key
+                    )
+                )
+            }
+    }
+
     fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> {
         if (req.start > req.end) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
 
         return statisticsRepository.timeSeries(
-            req.start.toMillis(),
-            req.end.toMillis(),
-            req.interval.toMillis()
+            req.start,
+            req.end,
+            req.interval
         )
     }
 

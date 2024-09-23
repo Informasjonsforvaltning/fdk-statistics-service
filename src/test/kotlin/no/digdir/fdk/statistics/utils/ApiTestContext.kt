@@ -1,5 +1,6 @@
 package no.digdir.fdk.statistics.utils
 
+import no.digdir.fdk.statistics.model.RecalculateRequest
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.service.StatisticsService
 import org.junit.jupiter.api.BeforeEach
@@ -10,6 +11,7 @@ import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.testcontainers.containers.PostgreSQLContainer
+import java.time.LocalDate
 
 abstract class ApiTestContext {
     @LocalServerPort
@@ -23,7 +25,7 @@ abstract class ApiTestContext {
 
     @BeforeEach
     fun resetDB() {
-        with(jdbcTemplate) { update("TRUNCATE statistics", emptyMap<String, String>()) }
+        with(jdbcTemplate) { update("TRUNCATE latest_for_date, statistics", emptyMap<String, String>()) }
 
         statisticsService.storeConceptStatistics("concept-0", CONCEPT_0, 1686305600000)
         statisticsService.storeConceptStatistics("concept-1", CONCEPT_1, 1686305600000)
@@ -54,6 +56,11 @@ abstract class ApiTestContext {
         statisticsService.storeServiceStatistics("service-1", SERVICE_1, 1699714547000)
         statisticsService.markAsRemovedForTimestamp("service-0", 1699714547000, ResourceType.SERVICE)
         statisticsService.storeServiceStatistics("service-0", SERVICE_0, 1700664947000)
+
+        statisticsService.recalculate(RecalculateRequest(
+            startInclusive = LocalDate.of(2023, 5, 1),
+            endExclusive = LocalDate.of(2024, 10, 1))
+        )
     }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
