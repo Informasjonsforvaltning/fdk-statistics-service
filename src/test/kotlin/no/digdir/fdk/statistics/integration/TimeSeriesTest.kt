@@ -30,7 +30,7 @@ class TimeSeriesTest : ApiTestContext() {
 
     @Test
     fun getTimeSeriesHandlesNullBody() {
-        val response = requestApi("/time-series", port, null, POST)
+        val response = requestApi("/time-series", port, null, null, POST)
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
@@ -39,7 +39,7 @@ class TimeSeriesTest : ApiTestContext() {
 
     @Test
     fun getTimeSeriesPeriodMonth() {
-        val response = requestApi("/time-series", port, mapper.writeValueAsString(TIME_SERIES_REQUEST), POST)
+        val response = requestApi("/time-series", port, null, mapper.writeValueAsString(TIME_SERIES_REQUEST), POST)
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val expected = listOf(
@@ -62,6 +62,7 @@ class TimeSeriesTest : ApiTestContext() {
         val response = requestApi(
             "/time-series",
             port,
+            null,
             mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.WEEK)),
             POST
         )
@@ -76,6 +77,7 @@ class TimeSeriesTest : ApiTestContext() {
         val response = requestApi(
             "/time-series",
             port,
+            null,
             mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.DAY)),
             POST
         )
@@ -90,6 +92,7 @@ class TimeSeriesTest : ApiTestContext() {
         val response = requestApi(
             "/time-series",
             port,
+            null,
             mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(end = "2010-01-01")),
             POST
         )

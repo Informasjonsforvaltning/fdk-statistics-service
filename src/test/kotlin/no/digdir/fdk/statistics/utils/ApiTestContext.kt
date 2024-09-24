@@ -86,6 +86,7 @@ abstract class ApiTestContext {
 
         init {
             postgreSQLContainer.start()
+            startMockServer()
         }
     }
 }
