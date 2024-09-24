@@ -22,13 +22,13 @@ class StatusTest : ApiTestContext() {
 
     @Test
     fun ping() {
-        val response = requestApi("/ping", port, null, GET)
+        val response = requestApi("/ping", port, null, null, GET)
         assertEquals(HttpStatus.OK.value(), response["status"])
     }
 
     @Test
     fun ready() {
-        val response = requestApi("/ready", port, null, GET)
+        val response = requestApi("/ready", port, null, null, GET)
         assertEquals(HttpStatus.OK.value(), response["status"])
     }
 }

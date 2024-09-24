@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate
 fun requestApi(
     path: String,
     port: Int,
+    token: String?,
     body: String? = null,
     httpMethod: HttpMethod,
     accept: MediaType = MediaType.APPLICATION_JSON
@@ -20,6 +21,7 @@ fun requestApi(
     request.requestFactory = HttpComponentsClientHttpRequestFactory()
     val url = "http://localhost:$port$path"
     val headers = HttpHeaders()
+    token?.let { headers.setBearerAuth(it) }
     headers.accept = listOf(accept)
     headers.contentType = MediaType.APPLICATION_JSON
     val entity: HttpEntity<String> = HttpEntity(body, headers)

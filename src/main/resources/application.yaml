@@ -20,6 +20,9 @@ management:
     tags:
       application: fdk-statistics-service
 spring:
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: ${SSO_HOST}/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: ${SSO_HOST}/auth/realms/fdk
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   kafka:
@@ -72,6 +75,9 @@ application:
 ---
 spring:
   config.activate.on-profile: dev
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: https://sso.staging.fellesdatakatalog.digdir.no/auth/realms/fdk
   datasource:
     url: jdbc:postgresql://localhost:5432/statistics
     username: postgres
@@ -85,6 +91,9 @@ logging.level.no: DEBUG
 ---
 spring:
   config.activate.on-profile: test
+  security.oauth2.resourceserver.jwt:
+    jwk-set-uri: http://localhost:5050/auth/realms/fdk/protocol/openid-connect/certs
+    issuer-uri: http://localhost:5050/auth/realms/fdk
 application:
   scope: test.scope
   cors:
