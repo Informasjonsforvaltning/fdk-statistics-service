@@ -16,7 +16,7 @@ data class TimeSeriesRequest(
     val interval: Interval = Interval.MONTH
 )
 
-data class RecalculateRequest(
+data class CalculationRequest(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonDeserialize(using = LocalDateDeserializer::class)
     val startInclusive: LocalDate,

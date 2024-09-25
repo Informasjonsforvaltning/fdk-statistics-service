@@ -6,7 +6,7 @@ import no.digdir.fdk.statistics.model.Dataset
 import no.digdir.fdk.statistics.model.Event
 import no.digdir.fdk.statistics.model.InformationModel
 import no.digdir.fdk.statistics.model.LatestForDate
-import no.digdir.fdk.statistics.model.RecalculateRequest
+import no.digdir.fdk.statistics.model.CalculationRequest
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.model.Service
 import no.digdir.fdk.statistics.model.StatsData
@@ -118,7 +118,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun recalculate(req: RecalculateRequest) {
+    fun calculateLatest(req: CalculationRequest) {
         req.startInclusive
             .datesUntil(req.endExclusive)
             .forEach { date -> calculateLatestForDate(date) }
