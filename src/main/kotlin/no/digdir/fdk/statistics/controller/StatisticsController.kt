@@ -1,6 +1,6 @@
 package no.digdir.fdk.statistics.controller
 
-import no.digdir.fdk.statistics.model.RecalculateRequest
+import no.digdir.fdk.statistics.model.CalculationRequest
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import no.digdir.fdk.statistics.service.EndpointPermissions
@@ -28,13 +28,13 @@ class StatisticsController(
             ResponseEntity(statisticsService.timeSeries(req ?: TimeSeriesRequest()), HttpStatus.OK)
         } catch (ex: ResponseStatusException) { ResponseEntity(ex.statusCode) }
 
-    @PostMapping(value = ["/recalculate"])
-    fun recalculate(
+    @PostMapping(value = ["/calculate-latest"])
+    fun calculateLatest(
         @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody req: RecalculateRequest
+        @RequestBody req: CalculationRequest
     ): ResponseEntity<Unit> =
         if (endpointPermissions.hasAdminPermission(jwt)) {
-            statisticsService.recalculate(req)
+            statisticsService.calculateLatest(req)
             ResponseEntity(HttpStatus.OK)
         } else ResponseEntity(HttpStatus.FORBIDDEN)
 

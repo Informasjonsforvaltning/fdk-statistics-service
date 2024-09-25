@@ -71,6 +71,7 @@ application:
   prop: 1
   cors:
     originPatterns: "${CORS_ORIGIN_PATTERNS}"
+scheduling.enabled: true
 
 ---
 spring:
@@ -87,6 +88,7 @@ application:
   cors:
     originPatterns: "*"
 logging.level.no: DEBUG
+scheduling.enabled: false
 
 ---
 spring:
@@ -98,3 +100,4 @@ application:
   scope: test.scope
   cors:
     originPatterns: "*"
+scheduling.enabled: false

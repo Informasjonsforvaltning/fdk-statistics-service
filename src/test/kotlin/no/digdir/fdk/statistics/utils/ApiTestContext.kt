@@ -1,6 +1,6 @@
 package no.digdir.fdk.statistics.utils
 
-import no.digdir.fdk.statistics.model.RecalculateRequest
+import no.digdir.fdk.statistics.model.CalculationRequest
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.service.StatisticsService
 import org.junit.jupiter.api.BeforeEach
@@ -57,7 +57,7 @@ abstract class ApiTestContext {
         statisticsService.markAsRemovedForTimestamp("service-0", 1699714547000, ResourceType.SERVICE)
         statisticsService.storeServiceStatistics("service-0", SERVICE_0, 1700664947000)
 
-        statisticsService.recalculate(RecalculateRequest(
+        statisticsService.calculateLatest(CalculationRequest(
             startInclusive = LocalDate.of(2023, 5, 1),
             endExclusive = LocalDate.of(2024, 10, 1))
         )
