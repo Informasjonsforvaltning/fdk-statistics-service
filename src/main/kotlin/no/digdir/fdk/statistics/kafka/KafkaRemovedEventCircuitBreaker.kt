@@ -52,7 +52,7 @@ open class KafkaRemovedEventCircuitBreaker(
                 when {
                     event is ConceptEvent && event.type == ConceptEventType.CONCEPT_REMOVED -> {
                         logger.debug("Remove concept - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.CONCEPT
@@ -62,7 +62,7 @@ open class KafkaRemovedEventCircuitBreaker(
 
                     event is DataServiceEvent && event.type == DataServiceEventType.DATA_SERVICE_REMOVED -> {
                         logger.debug("Remove data service - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.DATA_SERVICE
@@ -72,7 +72,7 @@ open class KafkaRemovedEventCircuitBreaker(
 
                     event is DatasetEvent && event.type == DatasetEventType.DATASET_REMOVED -> {
                         logger.debug("Remove dataset - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.DATASET
@@ -82,7 +82,7 @@ open class KafkaRemovedEventCircuitBreaker(
 
                     event is EventEvent && event.type == EventEventType.EVENT_REMOVED -> {
                         logger.debug("Remove event - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.EVENT
@@ -92,7 +92,7 @@ open class KafkaRemovedEventCircuitBreaker(
 
                     event is InformationModelEvent && event.type == InformationModelEventType.INFORMATION_MODEL_REMOVED -> {
                         logger.debug("Remove information model - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.INFORMATION_MODEL
@@ -102,7 +102,7 @@ open class KafkaRemovedEventCircuitBreaker(
 
                     event is ServiceEvent && event.type == ServiceEventType.SERVICE_REMOVED -> {
                         logger.debug("Remove service - id: {}", event.fdkId)
-                        statisticsService.markAsRemovedForTimestamp(
+                        statisticsService.markResourceAsRemoved(
                             event.fdkId.toString(),
                             event.timestamp,
                             ResourceType.SERVICE

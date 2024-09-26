@@ -2,7 +2,7 @@ package no.digdir.fdk.statistics.model
 
 import java.time.LocalDate
 
-data class StatsData(
+data class ResourceEventMetrics(
     val id: String,
     val fdkId: String,
     val timestamp: Long,

@@ -9,7 +9,7 @@ import no.digdir.fdk.statistics.model.LatestForDate
 import no.digdir.fdk.statistics.model.CalculationRequest
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.model.Service
-import no.digdir.fdk.statistics.model.StatsData
+import no.digdir.fdk.statistics.model.ResourceEventMetrics
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import no.digdir.fdk.statistics.repository.StatisticsRepository
@@ -22,9 +22,9 @@ import java.time.ZoneOffset
 @Component
 class StatisticsService(private val statisticsRepository: StatisticsRepository) {
 
-    fun storeConceptStatistics(fdkId: String, concept: Concept, timestamp: Long) {
-        statisticsRepository.store(
-            StatsData(
+    fun storeConceptMetrics(fdkId: String, concept: Concept, timestamp: Long) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -35,9 +35,9 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun storeDataServiceStatistics(fdkId: String, dataService: DataService, timestamp: Long) {
-        statisticsRepository.store(
-            StatsData(
+    fun storeDataServiceMetrics(fdkId: String, dataService: DataService, timestamp: Long) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -48,9 +48,9 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun storeDatasetStatistics(fdkId: String, dataset: Dataset, timestamp: Long) {
-        statisticsRepository.store(
-            StatsData(
+    fun storeDatasetMetrics(fdkId: String, dataset: Dataset, timestamp: Long) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -62,9 +62,9 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun storeEventStatistics(fdkId: String, event: Event, timestamp: Long) {
-        statisticsRepository.store(
-            StatsData(
+    fun storeEventMetrics(fdkId: String, event: Event, timestamp: Long) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -75,9 +75,9 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun storeInformationModelStatistics(fdkId: String, informationModel: InformationModel, timestamp: Long) {
-        statisticsRepository.store(
-            StatsData(
+    fun storeInformationModelMetrics(fdkId: String, informationModel: InformationModel, timestamp: Long) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -88,13 +88,13 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun storeServiceStatistics(fdkId: String, service: Service, timestamp: Long) {
+    fun storeServiceMetrics(fdkId: String, service: Service, timestamp: Long) {
         val orgPath = if (!service.hasCompetentAuthority.isNullOrEmpty()) service.hasCompetentAuthority.first().orgPath
         else if (!service.ownedBy.isNullOrEmpty()) service.ownedBy.first().orgPath
         else null
 
-        statisticsRepository.store(
-            StatsData(
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -105,9 +105,9 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         )
     }
 
-    fun markAsRemovedForTimestamp(fdkId: String, timestamp: Long, resourceType: ResourceType) {
-        statisticsRepository.store(
-            StatsData(
+    fun markResourceAsRemoved(fdkId: String, timestamp: Long, resourceType: ResourceType) {
+        statisticsRepository.storeMetrics(
+            ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
@@ -132,7 +132,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
     private fun calculateLatestForDate(date: LocalDate) {
         statisticsRepository.latestForTimestamp(date.toMillis())
             .forEach {
-                statisticsRepository.storeForDate(
+                statisticsRepository.storeLatestForDate(
                     LatestForDate(
                         fdkId = it.value,
                         calculatedForDate = date,
