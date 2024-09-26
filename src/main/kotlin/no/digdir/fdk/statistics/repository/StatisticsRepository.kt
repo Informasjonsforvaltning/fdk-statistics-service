@@ -3,7 +3,11 @@ package no.digdir.fdk.statistics.repository
 import no.digdir.fdk.statistics.model.Interval
 import no.digdir.fdk.statistics.model.LatestForDate
 import no.digdir.fdk.statistics.model.ResourceEventMetrics
+import no.digdir.fdk.statistics.model.ResourceType
+import no.digdir.fdk.statistics.model.SearchFilter
+import no.digdir.fdk.statistics.model.TimeSeriesFilters
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
+import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
@@ -33,18 +37,41 @@ open class StatisticsRepository(
             Interval.MONTH -> "1 MONTH"
         }
 
-    open fun timeSeries(start: String, end: String, interval: Interval): List<TimeSeriesPoint> = with(jdbcTemplate) {
+    private fun typeFilter(filter: SearchFilter<ResourceType>?): String =
+        if (filter == null) ""
+        else " AND metrics.type = :type"
+
+    private fun orgPathFilter(filter: SearchFilter<String>?): String =
+        if (filter == null) ""
+        else " AND metrics.orgPath ~ :orgPath"
+
+    private fun transportFilter(filter: SearchFilter<Boolean>?): String =
+        if (filter == null) ""
+        else " AND metrics.isRelatedToTransportportal = :transport"
+
+    private fun TimeSeriesFilters?.toSQL(): String =
+        if (this == null) ""
+        else "${typeFilter(resourceType)}${orgPathFilter(orgPath)}${transportFilter(transport)}"
+
+    open fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> = with(jdbcTemplate) {
         query(
             """WITH range AS (SELECT generate_series(:start::DATE , :end::DATE , :interval::INTERVAL) AS dt)
                 SELECT r.dt AS calcDate, COUNT(*) AS calcCount
                 FROM range r
                 JOIN latest_for_date lfd ON lfd.calculatedForDate = r.dt
                 JOIN resource_event_metrics metrics ON lfd.statId = metrics.id
-                WHERE metrics.removed = false
+                WHERE metrics.removed = false ${req.filters.toSQL()}
                 GROUP BY r.dt
                 ORDER BY r.dt;
             """.trimIndent(),
-            mapOf("start" to start, "end" to end, "interval" to interval.toValue()),
+            mapOf(
+                "start" to req.start,
+                "end" to req.end,
+                "interval" to req.interval.toValue(),
+                "type" to req.filters?.resourceType?.value?.name,
+                "orgPath" to req.filters?.orgPath?.value,
+                "transport" to req.filters?.transport?.value
+            ),
             timeSeriesRowMapper
         ).filterNotNull()
     }

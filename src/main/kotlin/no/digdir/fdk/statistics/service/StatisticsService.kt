@@ -145,11 +145,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
     fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> {
         if (req.start > req.end) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
 
-        return statisticsRepository.timeSeries(
-            req.start,
-            req.end,
-            req.interval
-        )
+        return statisticsRepository.timeSeries(req)
     }
 
 }
