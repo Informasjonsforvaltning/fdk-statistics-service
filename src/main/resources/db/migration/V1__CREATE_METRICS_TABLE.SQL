@@ -1,4 +1,4 @@
-CREATE TABLE statistics(
+CREATE TABLE resource_event_metrics(
     id VARCHAR(200) NOT NULL,
     fdkId VARCHAR(200),
     timestamp BIGINT,

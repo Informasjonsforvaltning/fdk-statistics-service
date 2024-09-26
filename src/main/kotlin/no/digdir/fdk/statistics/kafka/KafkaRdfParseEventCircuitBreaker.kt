@@ -26,8 +26,8 @@ open class KafkaRdfParseEventCircuitBreaker(
 ) {
 
     private fun storeConcept(event: RdfParseEvent) {
-        logger.debug("Store concept - id: " + event.fdkId)
-        statisticsService.storeConceptStatistics(
+        logger.debug("Store concept metrics - id: " + event.fdkId)
+        statisticsService.storeConceptMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), Concept::class.java),
             event.timestamp
@@ -35,8 +35,8 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     private fun storeDataService(event: RdfParseEvent) {
-        logger.debug("Store data service - id: " + event.fdkId)
-        statisticsService.storeDataServiceStatistics(
+        logger.debug("Store data service metrics - id: " + event.fdkId)
+        statisticsService.storeDataServiceMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), DataService::class.java),
             event.timestamp
@@ -44,8 +44,8 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     private fun storeDataset(event: RdfParseEvent) {
-        logger.debug("Store dataset - id: " + event.fdkId)
-        statisticsService.storeDatasetStatistics(
+        logger.debug("Store dataset metrics - id: " + event.fdkId)
+        statisticsService.storeDatasetMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), Dataset::class.java),
             event.timestamp
@@ -53,8 +53,8 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     private fun storeEvent(event: RdfParseEvent) {
-        logger.debug("Store event - id: " + event.fdkId)
-        statisticsService.storeEventStatistics(
+        logger.debug("Store event metrics - id: " + event.fdkId)
+        statisticsService.storeEventMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), Event::class.java),
             event.timestamp
@@ -62,8 +62,8 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     private fun storeInformationModel(event: RdfParseEvent) {
-        logger.debug("Store information model - id: " + event.fdkId)
-        statisticsService.storeInformationModelStatistics(
+        logger.debug("Store information model metrics - id: " + event.fdkId)
+        statisticsService.storeInformationModelMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), InformationModel::class.java),
             event.timestamp
@@ -71,8 +71,8 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     private fun storeService(event: RdfParseEvent) {
-        logger.debug("Store service - id: " + event.fdkId)
-        statisticsService.storeServiceStatistics(
+        logger.debug("Store service metrics - id: " + event.fdkId)
+        statisticsService.storeServiceMetrics(
             event.fdkId.toString(),
             jacksonObjectMapper().readValue(event.data.toString(), Service::class.java),
             event.timestamp

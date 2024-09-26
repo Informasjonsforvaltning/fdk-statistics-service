@@ -2,7 +2,7 @@ package no.digdir.fdk.statistics.repository
 
 import no.digdir.fdk.statistics.model.Interval
 import no.digdir.fdk.statistics.model.LatestForDate
-import no.digdir.fdk.statistics.model.StatsData
+import no.digdir.fdk.statistics.model.ResourceEventMetrics
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
@@ -13,13 +13,13 @@ import java.sql.ResultSet
 open class StatisticsRepository(
     private val jdbcTemplate: NamedParameterJdbcTemplate
 ) {
-    private val timeseriesRowMapper: (ResultSet, rowNum: Int) -> TimeSeriesPoint? = { rs, _ ->
+    private val timeSeriesRowMapper: (ResultSet, rowNum: Int) -> TimeSeriesPoint? = { rs, _ ->
         TimeSeriesPoint(
             date = rs.getDate("calcDate").toLocalDate(),
             count = rs.getInt("calcCount")
         )
     }
-    private val rowMapper: (ResultSet, rowNum: Int) -> Pair<String, String>? = { rs, _ ->
+    private val latestRowMapper: (ResultSet, rowNum: Int) -> Pair<String, String>? = { rs, _ ->
         Pair(
             rs.getString("id"),
             rs.getString("fdkId")
@@ -39,13 +39,13 @@ open class StatisticsRepository(
                 SELECT r.dt AS calcDate, COUNT(*) AS calcCount
                 FROM range r
                 JOIN latest_for_date lfd ON lfd.calculatedForDate = r.dt
-                JOIN statistics s ON lfd.statId = s.id
-                WHERE s.removed = false
+                JOIN resource_event_metrics metrics ON lfd.statId = metrics.id
+                WHERE metrics.removed = false
                 GROUP BY r.dt
                 ORDER BY r.dt;
             """.trimIndent(),
             mapOf("start" to start, "end" to end, "interval" to interval.toValue()),
-            timeseriesRowMapper
+            timeSeriesRowMapper
         ).filterNotNull()
     }
 
@@ -53,20 +53,20 @@ open class StatisticsRepository(
         query(
             """WITH ranked_statistics AS (
                     SELECT id, fdkId, ROW_NUMBER() OVER (PARTITION BY fdkId ORDER BY timestamp DESC) AS rn
-                    FROM statistics
+                    FROM resource_event_metrics
                     WHERE timestamp < :date
                 )
                 SELECT id, fdkId
                 FROM ranked_statistics
                 WHERE rn = 1;
-            """.trimIndent(), mapOf("date" to date), rowMapper
+            """.trimIndent(), mapOf("date" to date), latestRowMapper
         )
     }.filterNotNull().toMap()
 
     @Transactional
-    open fun store(data: StatsData) = with(jdbcTemplate) {
+    open fun storeMetrics(data: ResourceEventMetrics) = with(jdbcTemplate) {
         update(
-            """INSERT INTO statistics (id, fdkId, timestamp, removed, type, orgPath, isRelatedToTransportportal)
+            """INSERT INTO resource_event_metrics (id, fdkId, timestamp, removed, type, orgPath, isRelatedToTransportportal)
                     VALUES (:id, :fdkId, :timestamp, :removed, :type, :orgPath, :isRelatedToTransportportal)
                     ON CONFLICT DO NOTHING
                 """.trimIndent(), data.asParams()
@@ -74,7 +74,7 @@ open class StatisticsRepository(
     }
 
     @Transactional
-    open fun storeForDate(latestForDate: LatestForDate) = with(jdbcTemplate) {
+    open fun storeLatestForDate(latestForDate: LatestForDate) = with(jdbcTemplate) {
         update(
             """INSERT INTO latest_for_date (fdkId, calculatedForDate, statId)
                     VALUES (:fdkId, :calculatedForDate, :statId)
@@ -83,7 +83,7 @@ open class StatisticsRepository(
         )
     }
 
-    private fun StatsData.asParams() = mapOf(
+    private fun ResourceEventMetrics.asParams() = mapOf(
         "id" to id,
         "fdkId" to fdkId,
         "timestamp" to timestamp,
