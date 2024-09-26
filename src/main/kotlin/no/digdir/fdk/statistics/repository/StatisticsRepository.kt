@@ -68,7 +68,11 @@ open class StatisticsRepository(
         update(
             """INSERT INTO resource_event_metrics (id, fdkId, timestamp, removed, type, orgPath, isRelatedToTransportportal)
                     VALUES (:id, :fdkId, :timestamp, :removed, :type, :orgPath, :isRelatedToTransportportal)
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (id)
+                    DO UPDATE SET removed = :removed,
+                        type = :type,
+                        orgPath = :orgPath,
+                        isRelatedToTransportportal = :isRelatedToTransportportal;
                 """.trimIndent(), data.asParams()
         )
     }
@@ -78,7 +82,8 @@ open class StatisticsRepository(
         update(
             """INSERT INTO latest_for_date (fdkId, calculatedForDate, statId)
                     VALUES (:fdkId, :calculatedForDate, :statId)
-                    ON CONFLICT DO NOTHING
+                    ON CONFLICT (fdkId, calculatedForDate)
+                    DO UPDATE SET statId = :statId;
                 """.trimIndent(), latestForDate.asParams()
         )
     }
