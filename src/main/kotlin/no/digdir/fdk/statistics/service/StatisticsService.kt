@@ -13,9 +13,7 @@ import no.digdir.fdk.statistics.model.ResourceEventMetrics
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import no.digdir.fdk.statistics.repository.StatisticsRepository
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.server.ResponseStatusException
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -119,6 +117,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
     }
 
     fun calculateLatest(req: CalculationRequest) {
+        req.validate()
         req.startInclusive
             .datesUntil(req.endExclusive)
             .forEach { date -> calculateLatestForDate(date) }
@@ -143,8 +142,7 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
     }
 
     fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> {
-        if (req.start > req.end) throw ResponseStatusException(HttpStatus.BAD_REQUEST)
-
+        req.validate()
         return statisticsRepository.timeSeries(req)
     }
 

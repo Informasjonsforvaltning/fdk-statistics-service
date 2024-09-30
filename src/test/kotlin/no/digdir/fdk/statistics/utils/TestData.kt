@@ -33,7 +33,7 @@ val SERVICE_1 =
     Service(ownedBy = listOf(ServiceOrganization(orgPath = "/PRIVAT/987654321")), hasCompetentAuthority = emptyList())
 
 val TIME_SERIES_REQUEST = TimeSeriesRequest(
-    start = "2023-06-11",
-    end = "2024-01-11",
+    start = "2024-01-11",
+    end = "2024-08-01",
     interval = Interval.MONTH
 )
