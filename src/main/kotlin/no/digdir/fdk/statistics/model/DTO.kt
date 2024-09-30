@@ -13,7 +13,7 @@ enum class Interval {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TimeSeriesRequest(
-    val start: String = LocalDate.now().minusYears(1).toString(),
+    val start: String = LocalDate.of(2024, 1, 1).toString(),
     val end: String = LocalDate.now().toString(),
     val interval: Interval = Interval.MONTH,
     val filters: TimeSeriesFilters? = null,
