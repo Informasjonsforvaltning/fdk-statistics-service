@@ -66,15 +66,29 @@ class ValidatorsTest {
         }
 
         @Test
-        fun notValidWhenCoveredPeriodIsSmallerThanTheInterval() {
+        fun notValidWhenCoveredPeriodIsSmallerThanOneDay() {
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(end = "2024-02-01").validate()
+                TIME_SERIES_REQUEST.copy(end = "2024-01-01").validate()
+            }
+        }
+
+        @Test
+        fun notValidWhenIntervalIsWeekAndPeriodDoesNotStartOrEndOnMonday() {
+            assertThrows<ResponseStatusException> {
+                TIME_SERIES_REQUEST.copy(start = "2024-01-02", end = "2024-05-06", interval = Interval.WEEK).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(end = "2024-01-15", interval = Interval.WEEK).validate()
+                TIME_SERIES_REQUEST.copy(end = "2024-05-01", interval = Interval.WEEK).validate()
+            }
+        }
+
+        @Test
+        fun notValidWhenIntervalIsMonthAndPeriodDoesNotStartOrEndOnTheFirstOfAMonth() {
+            assertThrows<ResponseStatusException> {
+                TIME_SERIES_REQUEST.copy(start = "2024-01-02").validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(end = "2024-01-11", interval = Interval.DAY).validate()
+                TIME_SERIES_REQUEST.copy(end = "2024-08-02").validate()
             }
         }
 
@@ -144,7 +158,11 @@ class ValidatorsTest {
         @Test
         fun notValidWhenEndDateIsAfterToday() {
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(end = LocalDate.now().plusDays(1).toString()).validate()
+                TIME_SERIES_REQUEST.copy(
+                    start = LocalDate.now().minusDays(7).toString(),
+                    end = LocalDate.now().plusDays(1).toString(),
+                    interval = Interval.DAY
+                ).validate()
             }
         }
     }

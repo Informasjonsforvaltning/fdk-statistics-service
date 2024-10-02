@@ -33,27 +33,17 @@ class TimeSeriesTest : ApiTestContext() {
     private val mapper = jacksonObjectMapper()
 
     @Test
-    fun getTimeSeriesHandlesNullBody() {
-        val response = requestApi("/time-series", port, null, null, POST)
-        assertEquals(HttpStatus.OK.value(), response["status"])
-
-        val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
-        assertFalse(result.isEmpty())
-    }
-
-    @Test
     fun getTimeSeriesPeriodMonth() {
         val response = requestApi("/time-series", port, null, mapper.writeValueAsString(TIME_SERIES_REQUEST), POST)
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val expected = listOf(
-            TimeSeriesPoint(date = LocalDate.of(2024, 1, 11), count = 2),
-            TimeSeriesPoint(date = LocalDate.of(2024, 2, 11), count = 3),
-            TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 6),
-            TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 7),
-            TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 10),
-            TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 11),
-            TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 12),
+            TimeSeriesPoint(date = LocalDate.of(2024, 2, 1), count = 2),
+            TimeSeriesPoint(date = LocalDate.of(2024, 3, 1), count = 4),
+            TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 6),
+            TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 8),
+            TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 10),
+            TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 12),
         )
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -66,13 +56,13 @@ class TimeSeriesTest : ApiTestContext() {
             "/time-series",
             port,
             null,
-            mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.WEEK)),
+            mapper.writeValueAsString(TIME_SERIES_REQUEST.copy(interval = Interval.WEEK, end = "2024-05-06")),
             POST
         )
         assertEquals(HttpStatus.OK.value(), response["status"])
 
         val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
-        assertEquals(29, result.size)
+        assertEquals(17, result.size)
     }
 
     @Test
@@ -125,13 +115,12 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 1, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 2, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 2, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 3, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -158,12 +147,11 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 2, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 3, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -190,11 +178,10 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -221,10 +208,9 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -251,9 +237,8 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -280,8 +265,7 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 2),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -313,13 +297,12 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 1, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 2, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 3),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 3),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 5),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 5),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 6),
+                TimeSeriesPoint(date = LocalDate.of(2024, 2, 1), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 3, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 3),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 4),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 5),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 6),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -346,13 +329,12 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 1, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 2, 11), count = 2),
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 3),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 4),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 5),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 6),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 6),
+                TimeSeriesPoint(date = LocalDate.of(2024, 2, 1), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 3, 1), count = 2),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 3),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 4),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 5),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 6),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 
@@ -383,11 +365,10 @@ class TimeSeriesTest : ApiTestContext() {
             assertEquals(HttpStatus.OK.value(), response["status"])
 
             val expected = listOf(
-                TimeSeriesPoint(date = LocalDate.of(2024, 3, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 4, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 5, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 6, 11), count = 1),
-                TimeSeriesPoint(date = LocalDate.of(2024, 7, 11), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 4, 1), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 5, 1), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 6, 1), count = 1),
+                TimeSeriesPoint(date = LocalDate.of(2024, 7, 1), count = 1),
             )
             val result: List<TimeSeriesPoint> = mapper.readValue(response["body"] as String)
 

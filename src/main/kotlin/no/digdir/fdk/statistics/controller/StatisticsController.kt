@@ -26,9 +26,9 @@ class StatisticsController(
     private val logger: Logger = LoggerFactory.getLogger(StatisticsController::class.java)
 
     @PostMapping(value = ["/time-series"])
-    fun timeSeries(@RequestBody req: TimeSeriesRequest?): ResponseEntity<List<TimeSeriesPoint>>  =
+    fun timeSeries(@RequestBody req: TimeSeriesRequest): ResponseEntity<List<TimeSeriesPoint>>  =
         try {
-            ResponseEntity(statisticsService.timeSeries(req ?: TimeSeriesRequest()), HttpStatus.OK)
+            ResponseEntity(statisticsService.timeSeries(req), HttpStatus.OK)
         } catch (ex: ResponseStatusException) {
             logger.debug("Time series failed with code {} and reason {}", ex.statusCode, ex.reason)
             ResponseEntity(ex.statusCode)
