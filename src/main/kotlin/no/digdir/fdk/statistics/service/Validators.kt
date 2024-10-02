@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
 import java.time.LocalDate
 
 fun CalculationRequest.validate() {
@@ -25,14 +26,14 @@ fun TimeSeriesRequest.validate() {
     val type = filters?.resourceType?.value
 
     when {
-        interval == Interval.DAY && startDate.isAfter(endDate.minusDays(1)) ->
+        startDate.isAfter(endDate.minusDays(1)) ->
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Period has to cover minimum 1 day")
 
-        interval == Interval.WEEK && startDate.isAfter(endDate.minusDays(7)) ->
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Period has to cover minimum 1 week")
+        interval == Interval.WEEK && listOf(startDate, endDate).any { it.dayOfWeek != DayOfWeek.MONDAY } ->
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Period has start and end on a monday")
 
-        interval == Interval.MONTH && startDate.isAfter(endDate.minusMonths(1)) ->
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Period has to cover minimum 1 month")
+        interval == Interval.MONTH && listOf(startDate, endDate).any { it.dayOfMonth != 1 } ->
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Period has to start and end on the first day of a month")
 
         interval == Interval.DAY && startDate.isBefore(endDate.minusMonths(4)) ->
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Max coverage for period is 4 months")
