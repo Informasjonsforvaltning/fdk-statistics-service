@@ -27,7 +27,7 @@ data class TimeSeriesFilters(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class SearchFilter<T>(
+data class SearchFilter<T>(
     val value: T
 )
 

@@ -29,6 +29,9 @@ open class Scheduler(private val statisticsService: StatisticsService) {
                 endExclusive = LocalDate.now()
             )
         )
+
+        log.info("Calculation done, clearing time-series cache")
+        statisticsService.clearTimeSeriesCache()
     }
 
 }

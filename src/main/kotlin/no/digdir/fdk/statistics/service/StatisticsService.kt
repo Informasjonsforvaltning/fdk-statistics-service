@@ -145,6 +145,8 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
             }
     }
 
+    fun clearTimeSeriesCache() = statisticsRepository.clearTimeSeriesCache()
+
     fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> {
         logger.debug("Building time series for request: {}", req)
         req.validate()

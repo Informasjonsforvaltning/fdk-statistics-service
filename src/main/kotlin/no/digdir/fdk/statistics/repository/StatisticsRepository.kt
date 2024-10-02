@@ -8,21 +8,39 @@ import no.digdir.fdk.statistics.model.SearchFilter
 import no.digdir.fdk.statistics.model.TimeSeriesFilters
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.cache.CacheManager
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.sql.ResultSet
+import java.util.UUID
 
 @Component
 open class StatisticsRepository(
-    private val jdbcTemplate: NamedParameterJdbcTemplate
+    private val jdbcTemplate: NamedParameterJdbcTemplate,
+    private val cacheManager: CacheManager
 ) {
+    private val logger: Logger = LoggerFactory.getLogger(StatisticsRepository::class.java)
+
+    private fun TimeSeriesRequest.cacheID(): UUID =
+        UUID.nameUUIDFromBytes(toString().toByteArray())
+
+    private fun timeSeriesCache() =
+        cacheManager.getCache("time-series")
+
+    fun clearTimeSeriesCache() {
+        timeSeriesCache()?.clear()
+    }
+
     private val timeSeriesRowMapper: (ResultSet, rowNum: Int) -> TimeSeriesPoint? = { rs, _ ->
         TimeSeriesPoint(
             date = rs.getDate("calcDate").toLocalDate(),
             count = rs.getInt("calcCount")
         )
     }
+
     private val latestRowMapper: (ResultSet, rowNum: Int) -> Pair<String, String>? = { rs, _ ->
         Pair(
             rs.getString("id"),
@@ -54,8 +72,13 @@ open class StatisticsRepository(
         else "${typeFilter(resourceType)}${orgPathFilter(orgPath)}${transportFilter(transport)}"
 
     open fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> = with(jdbcTemplate) {
-        query(
-            """WITH range AS (SELECT generate_series(:start::DATE , :end::DATE , :interval::INTERVAL) AS dt)
+        val cache = timeSeriesCache()
+        cache?.get(req.cacheID())?.let {
+            logger.debug("found {} in cache", req.cacheID())
+            it.get() as List<TimeSeriesPoint>
+        } ?: let {
+            val timeSeries = query(
+                """WITH range AS (SELECT generate_series(:start::DATE , :end::DATE , :interval::INTERVAL) AS dt)
                 SELECT r.dt AS calcDate, COUNT(*) AS calcCount
                 FROM range r
                 JOIN latest_for_date lfd ON lfd.calculatedForDate = r.dt
@@ -64,16 +87,21 @@ open class StatisticsRepository(
                 GROUP BY r.dt
                 ORDER BY r.dt;
             """.trimIndent(),
-            mapOf(
-                "start" to req.start,
-                "end" to req.end,
-                "interval" to req.interval.toValue(),
-                "type" to req.filters?.resourceType?.value?.name,
-                "orgPath" to req.filters?.orgPath?.value,
-                "transport" to req.filters?.transport?.value
-            ),
-            timeSeriesRowMapper
-        ).filterNotNull()
+                mapOf(
+                    "start" to req.start,
+                    "end" to req.end,
+                    "interval" to req.interval.toValue(),
+                    "type" to req.filters?.resourceType?.value?.name,
+                    "orgPath" to req.filters?.orgPath?.value,
+                    "transport" to req.filters?.transport?.value
+                ),
+                timeSeriesRowMapper
+            ).filterNotNull()
+
+            logger.debug("caching {}", req.cacheID())
+            cache?.put(req.cacheID(), timeSeries)
+            timeSeries
+        }
     }
 
     open fun latestForTimestamp(date: Long): Map<String, String> = with(jdbcTemplate) {
