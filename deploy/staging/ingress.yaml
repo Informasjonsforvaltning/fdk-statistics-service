@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   name: fdk-statistics-service
   annotations:
-    nginx.ingress.kubernetes.io/limit-rpm: '10'
+    nginx.ingress.kubernetes.io/limit-rps: '4'
     nginx.ingress.kubernetes.io/limit-burst-multiplier: '2'
     nginx.ingress.kubernetes.io/limit-whitelist: '10.0.0.0/8,162.244.5.0/24'
     nginx.ingress.kubernetes.io/server-snippet: |
