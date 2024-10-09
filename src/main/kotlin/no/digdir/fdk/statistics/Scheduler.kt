@@ -30,8 +30,9 @@ open class Scheduler(private val statisticsService: StatisticsService) {
             )
         )
 
-        log.info("Calculation done, clearing time-series cache")
+        log.info("Calculation done, clearing time-series cache and init with default requests")
         statisticsService.clearTimeSeriesCache()
+        statisticsService.cacheDefaultRequests()
     }
 
 }

@@ -7,16 +7,22 @@ import no.digdir.fdk.statistics.model.Event
 import no.digdir.fdk.statistics.model.InformationModel
 import no.digdir.fdk.statistics.model.LatestForDate
 import no.digdir.fdk.statistics.model.CalculationRequest
+import no.digdir.fdk.statistics.model.Interval
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.model.Service
 import no.digdir.fdk.statistics.model.ResourceEventMetrics
+import no.digdir.fdk.statistics.model.SearchFilter
+import no.digdir.fdk.statistics.model.TimeSeriesFilters
 import no.digdir.fdk.statistics.model.TimeSeriesPoint
 import no.digdir.fdk.statistics.model.TimeSeriesRequest
 import no.digdir.fdk.statistics.repository.StatisticsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Component
@@ -152,5 +158,85 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
         req.validate()
         return statisticsRepository.timeSeries(req)
     }
+
+    /**
+     * Run on startup
+     */
+    @EventListener
+    private fun initCache(event: ApplicationReadyEvent) =
+        cacheDefaultRequests()
+
+    fun cacheDefaultRequests() {
+        logger.info("Cache default requests")
+
+        val firstOfThisMonth = LocalDate.now().withDayOfMonth(1).toString()
+        val conceptStart = "2023-02-01"
+        val dataServiceStart = "2023-02-01"
+        val datasetStart = "2022-11-01"
+        val infoModelStart = "2024-01-01"
+
+        val conceptReq = TimeSeriesRequest(
+            start = conceptStart,
+            end = firstOfThisMonth,
+            interval = Interval.MONTH,
+            filters = TimeSeriesFilters(
+                resourceType = SearchFilter(value = ResourceType.CONCEPT),
+                orgPath = null,
+                transport = null
+            )
+        )
+
+        statisticsRepository.timeSeries(conceptReq)
+        statisticsRepository.timeSeries(conceptReq.addTransportFilter())
+
+        val dataServiceReq = TimeSeriesRequest(
+            start = dataServiceStart,
+            end = firstOfThisMonth,
+            interval = Interval.MONTH,
+            filters = TimeSeriesFilters(
+                resourceType = SearchFilter(value = ResourceType.DATA_SERVICE),
+                orgPath = null,
+                transport = null
+            )
+        )
+
+        statisticsRepository.timeSeries(dataServiceReq)
+        statisticsRepository.timeSeries(dataServiceReq.addTransportFilter())
+
+        val datasetReq = TimeSeriesRequest(
+            start = datasetStart,
+            end = firstOfThisMonth,
+            interval = Interval.MONTH,
+            filters = TimeSeriesFilters(
+                resourceType = SearchFilter(value = ResourceType.DATASET),
+                orgPath = null,
+                transport = null
+            )
+        )
+
+        statisticsRepository.timeSeries(datasetReq)
+        statisticsRepository.timeSeries(datasetReq.addTransportFilter())
+
+        val infoModelReq = TimeSeriesRequest(
+            start = infoModelStart,
+            end = firstOfThisMonth,
+            interval = Interval.MONTH,
+            filters = TimeSeriesFilters(
+                resourceType = SearchFilter(value = ResourceType.INFORMATION_MODEL),
+                orgPath = null,
+                transport = null
+            )
+        )
+
+        statisticsRepository.timeSeries(infoModelReq)
+        statisticsRepository.timeSeries(infoModelReq.addTransportFilter())
+    }
+
+    private fun TimeSeriesRequest.addTransportFilter() =
+        copy(
+            filters = filters?.copy(
+                transport = SearchFilter(value = true)
+            )
+        )
 
 }
