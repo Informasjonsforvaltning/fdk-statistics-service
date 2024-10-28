@@ -11,7 +11,6 @@ import no.digdir.fdk.statistics.utils.ApiTestContext
 import no.digdir.fdk.statistics.utils.TIME_SERIES_REQUEST
 import no.digdir.fdk.statistics.utils.requestApi
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
