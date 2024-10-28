@@ -19,15 +19,23 @@ import no.digdir.fdk.statistics.repository.StatisticsRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.cache.CacheManager
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 @Component
-class StatisticsService(private val statisticsRepository: StatisticsRepository) {
+class StatisticsService(
+    private val statisticsRepository: StatisticsRepository,
+    private val cacheManager: CacheManager
+) {
     private val logger: Logger = LoggerFactory.getLogger(StatisticsService::class.java)
+
+    fun clearTimeSeriesCache() {
+        cacheManager.getCache("time_series_cache")
+            ?.invalidate()
+    }
 
     fun storeConceptMetrics(fdkId: String, concept: Concept, timestamp: Long) {
         statisticsRepository.storeMetrics(
@@ -150,8 +158,6 @@ class StatisticsService(private val statisticsRepository: StatisticsRepository) 
                 )
             }
     }
-
-    fun clearTimeSeriesCache() = statisticsRepository.clearTimeSeriesCache()
 
     fun timeSeries(req: TimeSeriesRequest): List<TimeSeriesPoint> {
         logger.debug("Building time series for request: {}", req)
