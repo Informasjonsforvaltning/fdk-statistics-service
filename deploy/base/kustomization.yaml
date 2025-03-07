@@ -6,5 +6,5 @@ resources:
   - service-fdk-statistics-service.yaml
 images:
   - name: fdk-statistics-service
-    newName: eu.gcr.io/digdir-fdk-infra/fdk-statistics-service
+    newName: ghcr.io/informasjonsforvaltning/fdk-statistics-service
     newTag: $(GIT_COMMIT_SHA)
