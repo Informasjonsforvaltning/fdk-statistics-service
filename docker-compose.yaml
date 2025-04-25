@@ -1,24 +1,6 @@
 ---
 version: '3.8'
 services:
-#  fdk-statistics-service:
-#    image: eu.gcr.io/digdir-fdk-infra/fdk-statistics-service:test
-#    build: .
-#    environment:
-#      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-#      - KAFKA_SCHEMA_REGISTRY=http://schema-registry:8081
-#      - POSTGRES_HOST=postgres
-#      - POSTGRES_PORT=5432
-#      - POSTGRES_DB=statistics
-#      - POSTGRES_USERNAME=postgres
-#      - POSTGRES_PASSWORD=S3cret
-#      - CORS_ORIGIN_PATTERNS=*
-#      - LOG_LEVEL=DEBUG
-#    ports:
-#      - '8080:8080'
-#    depends_on:
-#      - postgres
-#      - schema-registry
 
   zookeeper:
     image: confluentinc/cp-zookeeper
