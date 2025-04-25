@@ -19,15 +19,6 @@ Ensure you have the following installed:
 - Maven
 - Docker
 
-### Generate sources
-
-Kafka messages are serialized using Avro. Avro schemas are located in ```kafka/schemas```. To generate sources from Avro
-schema, run the following command:
-
-```
-mvn generate-sources    
-```
-
 ### Running locally
 
 #### Clone the repository
@@ -35,6 +26,15 @@ mvn generate-sources
 ```sh
 git clone https://github.com/Informasjonsforvaltning/fdk-statistics-service.git
 cd fdk-statistics-service
+```
+
+#### Generate sources
+
+Kafka messages are serialized using Avro. Avro schemas are located in ```kafka/schemas```. To generate sources from Avro
+schema, run the following command:
+
+```
+mvn generate-sources    
 ```
 
 #### Start PostgreSQL database, Kafka cluster and setup topics/schemas
