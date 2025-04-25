@@ -49,9 +49,7 @@ docker-compose up -d
 If you have problems starting kafka, check if all health checks are ok. Make sure number at the end (after 'grep')
 matches desired topics.
 
-#### Start statistics service
-
-Start statistics service locally using maven. Use Spring profile **dev**.
+#### Start application
 
 ```
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
