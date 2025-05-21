@@ -1,4 +1,7 @@
 name: Deploy to staging
+permissions:
+  contents: read
+  packages: write
 
 on:
   pull_request:
@@ -9,7 +12,7 @@ on:
 jobs:
   build-fdk-statistics-service:
     name: Build when pull request is created
-    if: github.event.pull_request.draft == false
+    if: ${{ github.actor != 'dependabot[bot]' &&  github.event.pull_request.draft == false }}
     uses: Informasjonsforvaltning/workflows/.github/workflows/build-push.yaml@main
     with:
       app_name: fdk-statistics-service
@@ -33,3 +36,10 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DIGDIR_FDK_AUTODEPLOY: ${{ secrets.DIGDIR_FDK_DEV_AUTODEPLOY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  dependabot-build:
+    name: Build image on PR from dependabot
+    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
+    uses: Informasjonsforvaltning/workflows/.github/workflows/build.yaml@main
+    with:
+      java_version: '21'
