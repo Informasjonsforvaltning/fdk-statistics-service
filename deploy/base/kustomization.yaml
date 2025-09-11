@@ -8,3 +8,6 @@ images:
   - name: fdk-statistics-service
     newName: ghcr.io/informasjonsforvaltning/fdk-statistics-service
     newTag: $(GIT_COMMIT_SHA)
+
+patches:
+  - path: env.yaml
