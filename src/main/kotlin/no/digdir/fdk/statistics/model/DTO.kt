@@ -32,17 +32,17 @@ data class SearchFilter<T>(
 )
 
 data class CalculationRequest(
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonDeserialize(using = LocalDateDeserializer::class)
+    @param:JsonSerialize(using = LocalDateSerializer::class)
+    @param:JsonDeserialize(using = LocalDateDeserializer::class)
     val startInclusive: LocalDate,
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonDeserialize(using = LocalDateDeserializer::class)
+    @param:JsonSerialize(using = LocalDateSerializer::class)
+    @param:JsonDeserialize(using = LocalDateDeserializer::class)
     val endExclusive: LocalDate
 )
 
 data class TimeSeriesPoint(
-    @JsonSerialize(using = LocalDateSerializer::class)
-    @JsonDeserialize(using = LocalDateDeserializer::class)
+    @param:JsonSerialize(using = LocalDateSerializer::class)
+    @param:JsonDeserialize(using = LocalDateDeserializer::class)
     val date: LocalDate,
     val count: Int,
 )
