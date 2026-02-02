@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.3</version>
+        <version>3.5.10</version>
         <relativePath/>
     </parent>
 
@@ -41,9 +41,9 @@
         <maven.compiler.target>${java.release}</maven.compiler.target>
         <maven.exec.skip>false</maven.exec.skip>
 
-        <kotlin.version>2.1.10</kotlin.version>
-        <testcontainers.version>1.20.6</testcontainers.version>
-        <avro.version>1.12.0</avro.version>
+        <kotlin.version>2.2.21</kotlin.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
+        <avro.version>1.12.1</avro.version>
     </properties>
 
     <dependencies>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>org.xerial.snappy</groupId>
             <artifactId>snappy-java</artifactId>
-            <version>1.1.10.7</version>
+            <version>1.1.10.8</version>
         </dependency>
 
         <dependency>
@@ -106,12 +106,12 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-schema-registry-client</artifactId>
-            <version>7.9.0</version>
+            <version>7.9.5</version>
         </dependency>
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
-            <version>7.9.0</version>
+            <version>7.9.5</version>
         </dependency>
 
         <dependency>
@@ -127,13 +127,13 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.27.1</version>
+            <version>1.28.0</version>
         </dependency>
 
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>8.0</version>
+            <version>9.0</version>
         </dependency>
 
         <!-- Kotlin dependencies -->
@@ -182,7 +182,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.8.5</version>
+            <version>2.8.15</version>
         </dependency>
 
         <!-- Test -->
@@ -206,7 +206,7 @@
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk-jvm</artifactId>
-            <version>1.13.17</version>
+            <version>1.14.9</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -217,20 +217,20 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.4.4</version>
+            <version>5.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
             <artifactId>wiremock-standalone</artifactId>
-            <version>3.12.1</version>
+            <version>3.13.2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -301,7 +301,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.12</version>
+                <version>0.8.14</version>
                 <executions>
                     <execution>
                         <id>before-unit-test-execution</id>
@@ -378,7 +378,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.4</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <!--suppress UnresolvedMavenProperty -->
@@ -393,7 +393,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.3</version>
+                <version>3.5.4</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <!--suppress UnresolvedMavenProperty -->
