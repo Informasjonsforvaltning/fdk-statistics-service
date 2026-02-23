@@ -16,9 +16,19 @@
             }
         },
         {
+            "name": "harvestRunId", 
+            "type": ["null", "string"], 
+            "default": null
+        },
+        {
+            "name": "uri", 
+            "type": ["null", "string"], 
+            "default": null
+        },
+        {
             "name": "fdkId",
             "type": "string"
-        },
+        },        
         {
             "name": "graph",
             "type": "string"

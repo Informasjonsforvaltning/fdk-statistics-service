@@ -10,8 +10,7 @@ import no.digdir.fdk.statistics.model.Event
 import no.digdir.fdk.statistics.model.InformationModel
 import no.digdir.fdk.statistics.model.Service
 import no.digdir.fdk.statistics.service.StatisticsService
-import no.fdk.rdf.parse.RdfParseEvent
-import no.fdk.rdf.parse.RdfParseResourceType
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,87 +24,111 @@ open class KafkaRdfParseEventCircuitBreaker(
     private val statisticsService: StatisticsService
 ) {
 
-    private fun storeConcept(event: RdfParseEvent) {
-        logger.debug("Store concept metrics - id: " + event.fdkId)
+    private fun storeConcept(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store concept metrics - id: $fdkId")
         statisticsService.storeConceptMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), Concept::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, Concept::class.java),
+            timestamp
         )
     }
 
-    private fun storeDataService(event: RdfParseEvent) {
-        logger.debug("Store data service metrics - id: " + event.fdkId)
+    private fun storeDataService(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store data service metrics - id: $fdkId")
         statisticsService.storeDataServiceMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), DataService::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, DataService::class.java),
+            timestamp
         )
     }
 
-    private fun storeDataset(event: RdfParseEvent) {
-        logger.debug("Store dataset metrics - id: " + event.fdkId)
+    private fun storeDataset(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store dataset metrics - id: $fdkId")
         statisticsService.storeDatasetMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), Dataset::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, Dataset::class.java),
+            timestamp
         )
     }
 
-    private fun storeEvent(event: RdfParseEvent) {
-        logger.debug("Store event metrics - id: " + event.fdkId)
+    private fun storeEvent(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store event metrics - id: $fdkId")
         statisticsService.storeEventMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), Event::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, Event::class.java),
+            timestamp
         )
     }
 
-    private fun storeInformationModel(event: RdfParseEvent) {
-        logger.debug("Store information model metrics - id: " + event.fdkId)
+    private fun storeInformationModel(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store information model metrics - id: $fdkId")
         statisticsService.storeInformationModelMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), InformationModel::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, InformationModel::class.java),
+            timestamp
         )
     }
 
-    private fun storeService(event: RdfParseEvent) {
-        logger.debug("Store service metrics - id: " + event.fdkId)
+    private fun storeService(event: GenericRecord) {
+        val fdkId = event.get("fdkId")?.toString() ?: return
+        val data = event.get("data")?.toString() ?: return
+        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return
+        logger.debug("Store service metrics - id: $fdkId")
         statisticsService.storeServiceMetrics(
-            event.fdkId.toString(),
-            jacksonObjectMapper().readValue(event.data.toString(), Service::class.java),
-            event.timestamp
+            fdkId,
+            jacksonObjectMapper().readValue(data, Service::class.java),
+            timestamp
         )
     }
 
     @CircuitBreaker(name = "rdf-parse")
     @Transactional
     open fun process(
-        record: ConsumerRecord<String, RdfParseEvent>
+        record: ConsumerRecord<String, GenericRecord>
     ) {
         logger.debug("CB Received message - offset: " + record.offset())
 
         val event = record.value()
+        val harvestRunId = event.getNullableString("harvestRunId")
+        val uri = event.getNullableString("uri")
+        logger.debug("Message harvestRunId={}, uri={}", harvestRunId, uri)
+
+        val resourceType = event.get("resourceType")?.toString()?.lowercase() ?: ""
+
         try {
             val timeElapsed = measureTimedValue {
-                when (event?.resourceType) {
-                    RdfParseResourceType.CONCEPT -> storeConcept(event)
-                    RdfParseResourceType.DATA_SERVICE -> storeDataService(event)
-                    RdfParseResourceType.DATASET -> storeDataset(event)
-                    RdfParseResourceType.EVENT -> storeEvent(event)
-                    RdfParseResourceType.INFORMATION_MODEL -> storeInformationModel(event)
-                    RdfParseResourceType.SERVICE -> storeService(event)
+                when (resourceType) {
+                    "concept" -> storeConcept(event)
+                    "data_service" -> storeDataService(event)
+                    "dataset" -> storeDataset(event)
+                    "event" -> storeEvent(event)
+                    "information_model" -> storeInformationModel(event)
+                    "service" -> storeService(event)
                     else -> logger.debug("unknown rdf parse type")
                 }
             }
-            Metrics.timer("store_resource", "type", event.resourceType.name.lowercase())
+            Metrics.timer("store_resource", "type", resourceType)
                 .record(timeElapsed.duration.toJavaDuration())
         } catch (e: Exception) {
             logger.error("Error processing message", e)
             Metrics.counter(
                 "store_resource_error",
-                "type", event.resourceType.name.lowercase()
+                "type", resourceType
             ).increment()
             throw e
         }
