@@ -1,6 +1,6 @@
 package no.digdir.fdk.statistics.kafka
 
-import no.fdk.rdf.parse.RdfParseEvent
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -21,7 +21,7 @@ class KafkaRdfParseEventConsumer(
         concurrency = "4",
         id = "rdf-parse"
     )
-    fun listen(record: ConsumerRecord<String, RdfParseEvent>, ack: Acknowledgment) {
+    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) {
         try {
             kafkaRdfParseEventCircuitBreaker.process(record)
             ack.acknowledge()

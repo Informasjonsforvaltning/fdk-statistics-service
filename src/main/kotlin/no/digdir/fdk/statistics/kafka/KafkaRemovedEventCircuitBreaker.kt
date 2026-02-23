@@ -4,19 +4,7 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
 import io.micrometer.core.instrument.Metrics
 import no.digdir.fdk.statistics.model.ResourceType
 import no.digdir.fdk.statistics.service.StatisticsService
-import no.fdk.concept.ConceptEvent
-import no.fdk.concept.ConceptEventType
-import no.fdk.dataservice.DataServiceEvent
-import no.fdk.dataservice.DataServiceEventType
-import no.fdk.dataset.DatasetEvent
-import no.fdk.dataset.DatasetEventType
-import no.fdk.event.EventEvent
-import no.fdk.event.EventEventType
-import no.fdk.informationmodel.InformationModelEvent
-import no.fdk.informationmodel.InformationModelEventType
-import no.fdk.service.ServiceEvent
-import no.fdk.service.ServiceEventType
-import org.apache.avro.specific.SpecificRecord
+import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -29,89 +17,67 @@ import kotlin.time.toJavaDuration
 open class KafkaRemovedEventCircuitBreaker(
     private val statisticsService: StatisticsService
 ) {
-    private fun SpecificRecord.getResourceType(): String {
-        return when (this) {
-            is DatasetEvent -> "dataset"
-            is DataServiceEvent -> "data-service"
-            is ConceptEvent -> "concept"
-            is InformationModelEvent -> "information-model"
-            is ServiceEvent -> "service"
-            is EventEvent -> "event"
+    private fun GenericRecord.getResourceType(): String {
+        return when (schema?.fullName) {
+            "no.fdk.dataset.DatasetEvent" -> "dataset"
+            "no.fdk.dataservice.DataServiceEvent" -> "data-service"
+            "no.fdk.concept.ConceptEvent" -> "concept"
+            "no.fdk.informationmodel.InformationModelEvent" -> "information-model"
+            "no.fdk.service.ServiceEvent" -> "service"
+            "no.fdk.event.EventEvent" -> "event"
             else -> "invalid-type"
         }
     }
 
     @CircuitBreaker(name = "remove")
     @Transactional
-    open fun process(record: ConsumerRecord<String, SpecificRecord>) {
+    open fun process(record: ConsumerRecord<String, GenericRecord>) {
         logger.debug("Received message - offset: " + record.offset())
 
         val event = record.value()
+        val harvestRunId = event.getNullableString("harvestRunId")
+        val uri = event.getNullableString("uri")
+        logger.debug("Message harvestRunId={}, uri={}", harvestRunId, uri)
+
         try {
             val (deleted, timeElapsed) = measureTimedValue {
-                when {
-                    event is ConceptEvent && event.type == ConceptEventType.CONCEPT_REMOVED -> {
-                        logger.debug("Remove concept - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.CONCEPT
-                        )
+                val eventType = event.get("type")?.toString() ?: ""
+                val fdkId = event.get("fdkId")?.toString() ?: return@measureTimedValue false
+                val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return@measureTimedValue false
+
+                when (event.getResourceType() to eventType) {
+                    "concept" to "CONCEPT_REMOVED" -> {
+                        logger.debug("Remove concept - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.CONCEPT)
                         true
                     }
-
-                    event is DataServiceEvent && event.type == DataServiceEventType.DATA_SERVICE_REMOVED -> {
-                        logger.debug("Remove data service - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.DATA_SERVICE
-                        )
+                    "data-service" to "DATA_SERVICE_REMOVED" -> {
+                        logger.debug("Remove data service - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.DATA_SERVICE)
                         true
                     }
-
-                    event is DatasetEvent && event.type == DatasetEventType.DATASET_REMOVED -> {
-                        logger.debug("Remove dataset - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.DATASET
-                        )
+                    "dataset" to "DATASET_REMOVED" -> {
+                        logger.debug("Remove dataset - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.DATASET)
                         true
                     }
-
-                    event is EventEvent && event.type == EventEventType.EVENT_REMOVED -> {
-                        logger.debug("Remove event - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.EVENT
-                        )
+                    "event" to "EVENT_REMOVED" -> {
+                        logger.debug("Remove event - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.EVENT)
                         true
                     }
-
-                    event is InformationModelEvent && event.type == InformationModelEventType.INFORMATION_MODEL_REMOVED -> {
-                        logger.debug("Remove information model - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.INFORMATION_MODEL
-                        )
+                    "information-model" to "INFORMATION_MODEL_REMOVED" -> {
+                        logger.debug("Remove information model - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.INFORMATION_MODEL)
                         true
                     }
-
-                    event is ServiceEvent && event.type == ServiceEventType.SERVICE_REMOVED -> {
-                        logger.debug("Remove service - id: {}", event.fdkId)
-                        statisticsService.markResourceAsRemoved(
-                            event.fdkId.toString(),
-                            event.timestamp,
-                            ResourceType.SERVICE
-                        )
+                    "service" to "SERVICE_REMOVED" -> {
+                        logger.debug("Remove service - id: {}", fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.SERVICE)
                         true
                     }
-
                     else -> {
-                        logger.debug("Unknown event type: {}, skipping", event)
+                        logger.debug("Unknown event type: {} / {}, skipping", event.getResourceType(), eventType)
                         false
                     }
                 }
