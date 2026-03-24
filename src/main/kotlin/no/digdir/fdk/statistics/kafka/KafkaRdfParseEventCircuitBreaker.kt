@@ -1,7 +1,7 @@
 package no.digdir.fdk.statistics.kafka
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker
+import io.github.resilience4j.circuitbreaker.CircuitBreaker
 import io.micrometer.core.instrument.Metrics
 import no.digdir.fdk.statistics.model.Concept
 import no.digdir.fdk.statistics.model.DataService
@@ -14,6 +14,7 @@ import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import kotlin.time.measureTimedValue
@@ -21,7 +22,9 @@ import kotlin.time.toJavaDuration
 
 @Component
 open class KafkaRdfParseEventCircuitBreaker(
-    private val statisticsService: StatisticsService
+    private val statisticsService: StatisticsService,
+    @param:Qualifier("rdfParseCircuitBreaker")
+    private val circuitBreaker: CircuitBreaker,
 ) {
 
     private fun storeConcept(event: GenericRecord) {
@@ -96,41 +99,42 @@ open class KafkaRdfParseEventCircuitBreaker(
         )
     }
 
-    @CircuitBreaker(name = "rdf-parse")
     @Transactional
     open fun process(
         record: ConsumerRecord<String, GenericRecord>
     ) {
-        logger.debug("CB Received message - offset: " + record.offset())
+        circuitBreaker.executeRunnable {
+            logger.debug("CB Received message - offset: " + record.offset())
 
-        val event = record.value()
-        val harvestRunId = event.getNullableString("harvestRunId")
-        val uri = event.getNullableString("uri")
-        logger.debug("Message harvestRunId={}, uri={}", harvestRunId, uri)
+            val event = record.value()
+            val harvestRunId = event.getNullableString("harvestRunId")
+            val uri = event.getNullableString("uri")
+            logger.debug("Message harvestRunId={}, uri={}", harvestRunId, uri)
 
-        val resourceType = event.get("resourceType")?.toString()?.lowercase() ?: ""
+            val resourceType = event.get("resourceType")?.toString()?.lowercase() ?: ""
 
-        try {
-            val timeElapsed = measureTimedValue {
-                when (resourceType) {
-                    "concept" -> storeConcept(event)
-                    "data_service" -> storeDataService(event)
-                    "dataset" -> storeDataset(event)
-                    "event" -> storeEvent(event)
-                    "information_model" -> storeInformationModel(event)
-                    "service" -> storeService(event)
-                    else -> logger.debug("unknown rdf parse type")
+            try {
+                val timeElapsed = measureTimedValue {
+                    when (resourceType) {
+                        "concept" -> storeConcept(event)
+                        "data_service" -> storeDataService(event)
+                        "dataset" -> storeDataset(event)
+                        "event" -> storeEvent(event)
+                        "information_model" -> storeInformationModel(event)
+                        "service" -> storeService(event)
+                        else -> logger.debug("unknown rdf parse type")
+                    }
                 }
+                Metrics.timer("store_resource", "type", resourceType)
+                    .record(timeElapsed.duration.toJavaDuration())
+            } catch (e: Exception) {
+                logger.error("Error processing message", e)
+                Metrics.counter(
+                    "store_resource_error",
+                    "type", resourceType
+                ).increment()
+                throw e
             }
-            Metrics.timer("store_resource", "type", resourceType)
-                .record(timeElapsed.duration.toJavaDuration())
-        } catch (e: Exception) {
-            logger.error("Error processing message", e)
-            Metrics.counter(
-                "store_resource_error",
-                "type", resourceType
-            ).increment()
-            throw e
         }
     }
 

@@ -23,26 +23,11 @@ spring:
   security.oauth2.resourceserver.jwt:
     jwk-set-uri: ${KEYCLOAK_OIDC_ISSUER}/protocol/openid-connect/certs
     issuer-uri: ${KEYCLOAK_OIDC_ISSUER}
-  autoconfigure:
-    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-    properties:
-      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY:http://localhost:8081}
-      specific.avro.reader: false
-      auto.register.schemas: false
-      use.latest.version: true
-      value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
-      key.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
     consumer:
-      auto-offset-reset: earliest
-      enable-auto-commit: false
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-    producer:
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      compression-type: snappy
-    listener:
-      ack-mode: manual_immediate
+      properties:
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY:http://localhost:8081}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
@@ -53,19 +38,6 @@ spring:
     url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
-resilience4j:
-  circuitbreaker:
-    configs:
-      default:
-        slidingWindowType: COUNT_BASED
-        slidingWindowSize: 10
-        failureRateThreshold: 50
-        permittedNumberOfCallsInHalfOpenState: 3
-        waitDurationInOpenState: 60000
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-    instances:
-      rdf-parse.baseConfig: default
-      remove.baseConfig: default
 application:
   prop: 1
   cors:

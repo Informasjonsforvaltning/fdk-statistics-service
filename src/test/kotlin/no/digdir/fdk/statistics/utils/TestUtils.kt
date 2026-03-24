@@ -16,7 +16,7 @@ fun requestApi(
     body: String? = null,
     httpMethod: HttpMethod,
     accept: MediaType = MediaType.APPLICATION_JSON
-): Map<String, Any> {
+): Map<String, Any?> {
     val request = RestTemplate()
     request.requestFactory = HttpComponentsClientHttpRequestFactory()
     val url = "http://localhost:$port$path"
