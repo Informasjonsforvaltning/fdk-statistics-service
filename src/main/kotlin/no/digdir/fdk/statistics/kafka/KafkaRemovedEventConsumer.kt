@@ -35,8 +35,4 @@ class KafkaRemovedEventConsumer(
             ack.nack(Duration.ZERO)
         }
     }
-
-    companion object {
-        private val LOGGER: Logger = LoggerFactory.getLogger(KafkaRemovedEventConsumer::class.java)
-    }
 }
