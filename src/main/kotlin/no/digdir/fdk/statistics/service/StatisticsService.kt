@@ -37,101 +37,56 @@ class StatisticsService(
             ?.invalidate()
     }
 
-    fun storeConceptMetrics(fdkId: String, concept: Concept, timestamp: Long) {
+    private fun storeMetrics(
+        fdkId: String,
+        timestamp: Long,
+        type: ResourceType,
+        orgPath: String?,
+        removed: Boolean = false,
+        isRelatedToTransportportal: Boolean = false,
+    ) {
         statisticsRepository.storeMetrics(
             ResourceEventMetrics(
                 id = "$fdkId-$timestamp",
                 fdkId = fdkId,
                 timestamp = timestamp,
-                removed = false,
-                type = ResourceType.CONCEPT,
-                orgPath = concept.publisher?.orgPath
+                removed = removed,
+                type = type,
+                orgPath = orgPath,
+                isRelatedToTransportportal = isRelatedToTransportportal,
             )
         )
     }
 
-    fun storeDataServiceMetrics(fdkId: String, dataService: DataService, timestamp: Long) {
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = false,
-                type = ResourceType.DATA_SERVICE,
-                orgPath = dataService.publisher?.orgPath
-            )
+    fun storeConceptMetrics(fdkId: String, concept: Concept, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.CONCEPT, concept.publisher?.orgPath)
+
+    fun storeDataServiceMetrics(fdkId: String, dataService: DataService, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.DATA_SERVICE, dataService.publisher?.orgPath)
+
+    fun storeDatasetMetrics(fdkId: String, dataset: Dataset, timestamp: Long) =
+        storeMetrics(
+            fdkId, timestamp, ResourceType.DATASET, dataset.publisher?.orgPath,
+            isRelatedToTransportportal = dataset.isRelatedToTransportportal ?: false
         )
+
+    fun storeEventMetrics(fdkId: String, event: Event, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.EVENT, event.catalog?.publisher?.orgPath)
+
+    fun storeInformationModelMetrics(fdkId: String, informationModel: InformationModel, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.INFORMATION_MODEL, informationModel.publisher?.orgPath)
+
+    fun storeServiceMetrics(fdkId: String, service: Service, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.SERVICE, service.orgPath())
+
+    private fun Service.orgPath(): String? = when {
+        !hasCompetentAuthority.isNullOrEmpty() -> hasCompetentAuthority.first().orgPath
+        !ownedBy.isNullOrEmpty() -> ownedBy.first().orgPath
+        else -> null
     }
 
-    fun storeDatasetMetrics(fdkId: String, dataset: Dataset, timestamp: Long) {
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = false,
-                type = ResourceType.DATASET,
-                orgPath = dataset.publisher?.orgPath,
-                isRelatedToTransportportal = dataset.isRelatedToTransportportal ?: false,
-            )
-        )
-    }
-
-    fun storeEventMetrics(fdkId: String, event: Event, timestamp: Long) {
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = false,
-                type = ResourceType.EVENT,
-                orgPath = event.catalog?.publisher?.orgPath
-            )
-        )
-    }
-
-    fun storeInformationModelMetrics(fdkId: String, informationModel: InformationModel, timestamp: Long) {
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = false,
-                type = ResourceType.INFORMATION_MODEL,
-                orgPath = informationModel.publisher?.orgPath
-            )
-        )
-    }
-
-    fun storeServiceMetrics(fdkId: String, service: Service, timestamp: Long) {
-        val orgPath = if (!service.hasCompetentAuthority.isNullOrEmpty()) service.hasCompetentAuthority.first().orgPath
-        else if (!service.ownedBy.isNullOrEmpty()) service.ownedBy.first().orgPath
-        else null
-
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = false,
-                type = ResourceType.SERVICE,
-                orgPath = orgPath
-            )
-        )
-    }
-
-    fun markResourceAsRemoved(fdkId: String, timestamp: Long, resourceType: ResourceType) {
-        statisticsRepository.storeMetrics(
-            ResourceEventMetrics(
-                id = "$fdkId-$timestamp",
-                fdkId = fdkId,
-                timestamp = timestamp,
-                removed = true,
-                type = resourceType,
-                orgPath = null
-            )
-        )
-    }
+    fun markResourceAsRemoved(fdkId: String, timestamp: Long, resourceType: ResourceType) =
+        storeMetrics(fdkId, timestamp, resourceType, orgPath = null, removed = true)
 
     fun calculateLatest(req: CalculationRequest) {
         logger.info("Starting calculation of latest metrics for period between {} and {}", req.startInclusive, req.endExclusive)
@@ -176,66 +131,28 @@ class StatisticsService(
         logger.info("Cache default requests")
 
         val firstOfThisMonth = LocalDate.now().withDayOfMonth(1).toString()
-        val conceptStart = "2023-02-01"
-        val dataServiceStart = "2023-02-01"
-        val datasetStart = "2022-11-01"
-        val infoModelStart = "2024-01-01"
-
-        val conceptReq = TimeSeriesRequest(
-            start = conceptStart,
-            end = firstOfThisMonth,
-            interval = Interval.MONTH,
-            filters = TimeSeriesFilters(
-                resourceType = SearchFilter(value = ResourceType.CONCEPT),
-                orgPath = null,
-                transport = null
-            )
+        val typesToWarmUp = listOf(
+            ResourceType.CONCEPT,
+            ResourceType.DATA_SERVICE,
+            ResourceType.DATASET,
+            ResourceType.INFORMATION_MODEL,
         )
 
-        statisticsRepository.timeSeries(conceptReq)
-        statisticsRepository.timeSeries(conceptReq.addTransportFilter())
-
-        val dataServiceReq = TimeSeriesRequest(
-            start = dataServiceStart,
-            end = firstOfThisMonth,
-            interval = Interval.MONTH,
-            filters = TimeSeriesFilters(
-                resourceType = SearchFilter(value = ResourceType.DATA_SERVICE),
-                orgPath = null,
-                transport = null
+        typesToWarmUp.forEach { type ->
+            val req = TimeSeriesRequest(
+                start = type.availableFrom.toString(),
+                end = firstOfThisMonth,
+                interval = Interval.MONTH,
+                filters = TimeSeriesFilters(
+                    resourceType = SearchFilter(value = type),
+                    orgPath = null,
+                    transport = null
+                )
             )
-        )
 
-        statisticsRepository.timeSeries(dataServiceReq)
-        statisticsRepository.timeSeries(dataServiceReq.addTransportFilter())
-
-        val datasetReq = TimeSeriesRequest(
-            start = datasetStart,
-            end = firstOfThisMonth,
-            interval = Interval.MONTH,
-            filters = TimeSeriesFilters(
-                resourceType = SearchFilter(value = ResourceType.DATASET),
-                orgPath = null,
-                transport = null
-            )
-        )
-
-        statisticsRepository.timeSeries(datasetReq)
-        statisticsRepository.timeSeries(datasetReq.addTransportFilter())
-
-        val infoModelReq = TimeSeriesRequest(
-            start = infoModelStart,
-            end = firstOfThisMonth,
-            interval = Interval.MONTH,
-            filters = TimeSeriesFilters(
-                resourceType = SearchFilter(value = ResourceType.INFORMATION_MODEL),
-                orgPath = null,
-                transport = null
-            )
-        )
-
-        statisticsRepository.timeSeries(infoModelReq)
-        statisticsRepository.timeSeries(infoModelReq.addTransportFilter())
+            statisticsRepository.timeSeries(req)
+            statisticsRepository.timeSeries(req.addTransportFilter())
+        }
     }
 
     private fun TimeSeriesRequest.addTransportFilter() =

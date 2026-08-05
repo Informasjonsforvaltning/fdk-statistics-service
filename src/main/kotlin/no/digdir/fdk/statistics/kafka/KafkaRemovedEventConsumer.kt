@@ -2,12 +2,9 @@ package no.digdir.fdk.statistics.kafka
 
 import org.apache.avro.generic.GenericRecord
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
-import java.time.Duration
 
 @Component
 class KafkaRemovedEventConsumer(
@@ -27,12 +24,6 @@ class KafkaRemovedEventConsumer(
         containerFactory = "kafkaListenerContainerFactory",
         id = "remove"
     )
-    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) {
-        try {
-            kafkaRemovedEventCircuitBreaker.process(record)
-            ack.acknowledge()
-        } catch (e: Exception) {
-            ack.nack(Duration.ZERO)
-        }
-    }
+    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) =
+        ack.acknowledgeOrNack { kafkaRemovedEventCircuitBreaker.process(record) }
 }
