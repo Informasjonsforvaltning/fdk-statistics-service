@@ -20,8 +20,8 @@ open class KafkaRemovedEventCircuitBreaker(
     @param:Qualifier("removeCircuitBreaker")
     private val circuitBreaker: CircuitBreaker,
 ) {
-    private fun GenericRecord.getResourceType(): String {
-        return when (schema?.fullName) {
+    private fun GenericRecord.getResourceType(): String =
+        when (schema?.fullName) {
             "no.fdk.dataset.DatasetEvent" -> "dataset"
             "no.fdk.dataservice.DataServiceEvent" -> "data-service"
             "no.fdk.concept.ConceptEvent" -> "concept"
@@ -30,7 +30,6 @@ open class KafkaRemovedEventCircuitBreaker(
             "no.fdk.event.EventEvent" -> "event"
             else -> "invalid-type"
         }
-    }
 
     @Transactional
     open fun process(record: ConsumerRecord<String, GenericRecord>) {
@@ -43,32 +42,36 @@ open class KafkaRemovedEventCircuitBreaker(
             logger.debug("Message harvestRunId={}, uri={}", harvestRunId, uri)
 
             try {
-                val (deleted, timeElapsed) = measureTimedValue {
-                    val eventType = event.get("type")?.toString() ?: ""
-                    val fdkId = event.get("fdkId")?.toString() ?: return@measureTimedValue false
-                    val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return@measureTimedValue false
+                val (deleted, timeElapsed) =
+                    measureTimedValue {
+                        val eventType = event.get("type")?.toString() ?: ""
+                        val fdkId = event.get("fdkId")?.toString() ?: return@measureTimedValue false
+                        val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return@measureTimedValue false
 
-                    val resourceType = REMOVED_EVENT_TYPES[event.getResourceType() to eventType]
-                    if (resourceType != null) {
-                        logger.debug("Remove {} - id: {}", resourceType, fdkId)
-                        statisticsService.markResourceAsRemoved(fdkId, timestamp, resourceType)
-                        true
-                    } else {
-                        logger.debug("Unknown event type: {} / {}, skipping", event.getResourceType(), eventType)
-                        false
+                        val resourceType = REMOVED_EVENT_TYPES[event.getResourceType() to eventType]
+                        if (resourceType != null) {
+                            logger.debug("Remove {} - id: {}", resourceType, fdkId)
+                            statisticsService.markResourceAsRemoved(fdkId, timestamp, resourceType)
+                            true
+                        } else {
+                            logger.debug("Unknown event type: {} / {}, skipping", event.getResourceType(), eventType)
+                            false
+                        }
                     }
-                }
 
                 if (deleted) {
-                    Metrics.timer("resource_delete", "type", event.getResourceType())
+                    Metrics
+                        .timer("resource_delete", "type", event.getResourceType())
                         .record(timeElapsed.toJavaDuration())
                 }
             } catch (e: Exception) {
                 logger.error("Error processing message", e)
-                Metrics.counter(
-                    "resource_delete_error",
-                    "type", event.getResourceType()
-                ).increment()
+                Metrics
+                    .counter(
+                        "resource_delete_error",
+                        "type",
+                        event.getResourceType(),
+                    ).increment()
                 throw e
             }
         }
@@ -78,13 +81,14 @@ open class KafkaRemovedEventCircuitBreaker(
         private val logger: Logger = LoggerFactory.getLogger(KafkaRemovedEventCircuitBreaker::class.java)
 
         // Maps (resource type, avro event type) pairs to the corresponding ResourceType
-        private val REMOVED_EVENT_TYPES: Map<Pair<String, String>, ResourceType> = mapOf(
-            ("concept" to "CONCEPT_REMOVED") to ResourceType.CONCEPT,
-            ("data-service" to "DATA_SERVICE_REMOVED") to ResourceType.DATA_SERVICE,
-            ("dataset" to "DATASET_REMOVED") to ResourceType.DATASET,
-            ("event" to "EVENT_REMOVED") to ResourceType.EVENT,
-            ("information-model" to "INFORMATION_MODEL_REMOVED") to ResourceType.INFORMATION_MODEL,
-            ("service" to "SERVICE_REMOVED") to ResourceType.SERVICE,
-        )
+        private val REMOVED_EVENT_TYPES: Map<Pair<String, String>, ResourceType> =
+            mapOf(
+                ("concept" to "CONCEPT_REMOVED") to ResourceType.CONCEPT,
+                ("data-service" to "DATA_SERVICE_REMOVED") to ResourceType.DATA_SERVICE,
+                ("dataset" to "DATASET_REMOVED") to ResourceType.DATASET,
+                ("event" to "EVENT_REMOVED") to ResourceType.EVENT,
+                ("information-model" to "INFORMATION_MODEL_REMOVED") to ResourceType.INFORMATION_MODEL,
+                ("service" to "SERVICE_REMOVED") to ResourceType.SERVICE,
+            )
     }
 }

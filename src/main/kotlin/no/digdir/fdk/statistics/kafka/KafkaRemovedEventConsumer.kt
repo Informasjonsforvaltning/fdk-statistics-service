@@ -8,9 +8,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class KafkaRemovedEventConsumer(
-    private val kafkaRemovedEventCircuitBreaker: KafkaRemovedEventCircuitBreaker
+    private val kafkaRemovedEventCircuitBreaker: KafkaRemovedEventCircuitBreaker,
 ) {
-
     @KafkaListener(
         topics = [
             "dataset-events",
@@ -18,12 +17,15 @@ class KafkaRemovedEventConsumer(
             "concept-events",
             "information-model-events",
             "event-events",
-            "service-events"],
+            "service-events",
+        ],
         groupId = "fdk-statistics-service",
         concurrency = "4",
         containerFactory = "kafkaListenerContainerFactory",
-        id = "remove"
+        id = "remove",
     )
-    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) =
-        ack.acknowledgeOrNack { kafkaRemovedEventCircuitBreaker.process(record) }
+    fun listen(
+        record: ConsumerRecord<String, GenericRecord>,
+        ack: Acknowledgment,
+    ) = ack.acknowledgeOrNack { kafkaRemovedEventCircuitBreaker.process(record) }
 }

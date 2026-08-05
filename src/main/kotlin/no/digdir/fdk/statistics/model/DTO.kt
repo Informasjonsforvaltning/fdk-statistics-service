@@ -8,7 +8,9 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import java.time.LocalDate
 
 enum class Interval {
-    DAY, WEEK, MONTH;
+    DAY,
+    WEEK,
+    MONTH,
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,12 +25,12 @@ data class TimeSeriesRequest(
 data class TimeSeriesFilters(
     val resourceType: SearchFilter<ResourceType>?,
     val orgPath: SearchFilter<String>?,
-    val transport: SearchFilter<Boolean>?
+    val transport: SearchFilter<Boolean>?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SearchFilter<T>(
-    val value: T
+    val value: T,
 )
 
 data class CalculationRequest(
@@ -37,7 +39,7 @@ data class CalculationRequest(
     val startInclusive: LocalDate,
     @param:JsonSerialize(using = LocalDateSerializer::class)
     @param:JsonDeserialize(using = LocalDateDeserializer::class)
-    val endExclusive: LocalDate
+    val endExclusive: LocalDate,
 )
 
 data class TimeSeriesPoint(

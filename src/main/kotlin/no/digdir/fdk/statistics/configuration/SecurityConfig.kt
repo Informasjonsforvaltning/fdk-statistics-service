@@ -10,19 +10,19 @@ import org.springframework.http.HttpMethod
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator
+import org.springframework.security.oauth2.jwt.JwtClaimNames.AUD
 import org.springframework.security.oauth2.jwt.JwtClaimValidator
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.JwtIssuerValidator
 import org.springframework.security.oauth2.jwt.JwtTimestampValidator
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
-import org.springframework.security.oauth2.jwt.JwtClaimNames.AUD
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 
 @Configuration
 open class SecurityConfig(
     @param:Value("\${application.cors.originPatterns}")
-    val corsOriginPatterns: Array<String>
+    val corsOriginPatterns: Array<String>,
 ) {
     @Bean
     open fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -40,32 +40,28 @@ open class SecurityConfig(
 
                     config
                 }
-            }
-            .csrf {
+            }.csrf {
                 it.disable()
-            }
-            .sessionManagement {
+            }.sessionManagement {
                 it.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            }
-            .authorizeHttpRequests { authorize ->
+            }.authorizeHttpRequests { authorize ->
                 authorize.requestMatchers(HttpMethod.GET).permitAll()
                 authorize.requestMatchers(HttpMethod.POST, "/time-series").permitAll()
                 authorize.anyRequest().authenticated()
-            }
-            .oauth2ResourceServer { resourceServer -> resourceServer.jwt {  } }
+            }.oauth2ResourceServer { resourceServer -> resourceServer.jwt { } }
 
         return http.build()
     }
 
     @Bean
     open fun jwtDecoder(properties: OAuth2ResourceServerProperties): JwtDecoder? {
-        val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(properties.jwt.jwkSetUri).build()
+        val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(properties.jwt.jwkSetUri!!).build()
         jwtDecoder.setJwtValidator(
             DelegatingOAuth2TokenValidator(
                 JwtTimestampValidator(),
-                JwtIssuerValidator(properties.jwt.issuerUri),
-                JwtClaimValidator(AUD) { aud: List<String> -> aud.contains("fdk-harvest-admin") }
-            )
+                JwtIssuerValidator(properties.jwt.issuerUri!!),
+                JwtClaimValidator(AUD) { aud: List<String> -> aud.contains("fdk-harvest-admin") },
+            ),
         )
         return jwtDecoder
     }

@@ -19,7 +19,6 @@ open class KafkaConsumerConfig(
     @param:Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
     @param:Value("\${spring.kafka.consumer.properties.schema.registry.url}") private val schemaRegistryUrl: String,
 ) {
-
     @Bean
     open fun consumerFactory(): ConsumerFactory<String, Any> {
         val props: MutableMap<String, Any> = HashMap()

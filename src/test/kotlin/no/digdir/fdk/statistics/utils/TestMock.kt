@@ -1,20 +1,28 @@
 package no.digdir.fdk.statistics.utils
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import no.digdir.fdk.statistics.utils.jwk.JwkStore
 
 private val mockserver = WireMockServer(5050)
 
 fun startMockServer() {
-    if(!mockserver.isRunning) {
-        mockserver.stubFor(get(urlEqualTo("/ping"))
-                .willReturn(aResponse()
-                        .withStatus(200))
+    if (!mockserver.isRunning) {
+        mockserver.stubFor(
+            get(urlEqualTo("/ping"))
+                .willReturn(
+                    aResponse()
+                        .withStatus(200),
+                ),
         )
 
-        mockserver.stubFor(get(urlEqualTo("/auth/realms/fdk/protocol/openid-connect/certs"))
-            .willReturn(okJson(JwkStore.get())))
+        mockserver.stubFor(
+            get(urlEqualTo("/auth/realms/fdk/protocol/openid-connect/certs"))
+                .willReturn(okJson(JwkStore.get())),
+        )
 
         mockserver.start()
     }

@@ -14,12 +14,11 @@ import org.springframework.test.context.ContextConfiguration
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     properties = ["spring.profiles.active=test"],
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
 @ContextConfiguration(initializers = [ApiTestContext.Initializer::class])
 @Tag("integration")
 class StatusTest : ApiTestContext() {
-
     @Test
     fun ping() {
         val response = requestApi("/ping", port, null, null, GET)

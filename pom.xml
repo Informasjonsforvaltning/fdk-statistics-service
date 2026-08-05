@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.1.0</version>
         <relativePath/>
     </parent>
 
@@ -41,7 +41,7 @@
         <maven.compiler.target>${java.release}</maven.compiler.target>
         <maven.exec.skip>false</maven.exec.skip>
 
-        <kotlin.version>2.3.21</kotlin.version>
+        <kotlin.version>2.4.10</kotlin.version>
         <testcontainers.version>2.0.5</testcontainers.version>
         <avro.version>1.12.1</avro.version>
     </properties>
@@ -108,12 +108,12 @@
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-schema-registry-client</artifactId>
-            <version>8.2.0</version>
+            <version>8.3.0</version>
         </dependency>
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-avro-serializer</artifactId>
-            <version>8.2.0</version>
+            <version>8.3.0</version>
         </dependency>
 
         <dependency>
@@ -213,7 +213,7 @@
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk-jvm</artifactId>
-            <version>1.14.9</version>
+            <version>1.14.11</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -231,7 +231,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.6.1</version>
+            <version>5.6.2</version>
         </dependency>
         <dependency>
             <groupId>org.wiremock</groupId>
@@ -242,6 +242,8 @@
     </dependencies>
     <build>
         <finalName>app</finalName>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
@@ -282,7 +284,6 @@
                             <jvmTarget>${java.release}</jvmTarget>
                             <sourceDirs>
                                 <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
-                                <sourceDir>${project.basedir}/src/main/java</sourceDir>
                                 <sourceDir>${project.build.directory}/generated-sources/avro</sourceDir>
                             </sourceDirs>
                         </configuration>
@@ -308,7 +309,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.14</version>
+                <version>0.8.15</version>
                 <executions>
                     <execution>
                         <id>before-unit-test-execution</id>
@@ -383,9 +384,24 @@
             </plugin>
 
             <plugin>
+                <groupId>com.github.gantsign.maven</groupId>
+                <artifactId>ktlint-maven-plugin</artifactId>
+                <version>3.7.1</version>
+                <executions>
+                    <execution>
+                        <id>format-and-check</id>
+                        <goals>
+                            <goal>format</goal>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <!--suppress UnresolvedMavenProperty -->
@@ -400,7 +416,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>3.5.6</version>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                     <!--suppress UnresolvedMavenProperty -->
