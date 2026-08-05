@@ -15,7 +15,7 @@ fun requestApi(
     token: String?,
     body: String? = null,
     httpMethod: HttpMethod,
-    accept: MediaType = MediaType.APPLICATION_JSON
+    accept: MediaType = MediaType.APPLICATION_JSON,
 ): Map<String, Any?> {
     val request = RestTemplate()
     request.requestFactory = HttpComponentsClientHttpRequestFactory()
@@ -31,25 +31,25 @@ fun requestApi(
         mapOf(
             "body" to response.body,
             "header" to response.headers,
-            "status" to response.statusCode.value()
+            "status" to response.statusCode.value(),
         )
     } catch (e: HttpClientErrorException) {
         mapOf(
             "status" to e.statusCode.value(),
             "header" to " ",
-            "body" to e.responseBodyAsString
+            "body" to e.responseBodyAsString,
         )
     } catch (e: HttpServerErrorException) {
         mapOf(
             "status" to e.statusCode.value(),
             "header" to " ",
-            "body" to e.responseBodyAsString
+            "body" to e.responseBodyAsString,
         )
     } catch (e: Exception) {
         mapOf(
             "status" to e.toString(),
             "header" to " ",
-            "body" to " "
+            "body" to " ",
         )
     }
 }

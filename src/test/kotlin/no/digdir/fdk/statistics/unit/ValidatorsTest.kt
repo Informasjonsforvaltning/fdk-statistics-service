@@ -17,13 +17,13 @@ import java.time.LocalDate
 
 @Tag("unit")
 class ValidatorsTest {
-
     @Nested
     inner class ValidateCalculationRequest {
-        private val okReq = CalculationRequest(
-            startInclusive = LocalDate.of(2024, 1, 1),
-            endExclusive = LocalDate.of(2024, 2, 1)
-        )
+        private val okReq =
+            CalculationRequest(
+                startInclusive = LocalDate.of(2024, 1, 1),
+                endExclusive = LocalDate.of(2024, 2, 1),
+            )
 
         @Test
         fun validWhenCalculatingOneMonth() {
@@ -54,7 +54,6 @@ class ValidatorsTest {
 
     @Nested
     inner class ValidateTimeSeriesRequest {
-
         @Test
         fun notValidWhenDatesAreOtherFormats() {
             assertThrows<ResponseStatusException> {
@@ -112,57 +111,64 @@ class ValidatorsTest {
                 TIME_SERIES_REQUEST.copy(start = "2023-12-01", end = "2024-02-01").validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2023-01-01",
-                    end = "2023-04-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.CONCEPT))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2023-01-01",
+                        end = "2023-04-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.CONCEPT)),
+                    ).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2023-01-01",
-                    end = "2023-04-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.DATA_SERVICE))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2023-01-01",
+                        end = "2023-04-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.DATA_SERVICE)),
+                    ).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2022-10-01",
-                    end = "2022-12-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.DATASET))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2022-10-01",
+                        end = "2022-12-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.DATASET)),
+                    ).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2023-12-01",
-                    end = "2024-02-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.EVENT))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2023-12-01",
+                        end = "2024-02-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.EVENT)),
+                    ).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2023-12-01",
-                    end = "2024-02-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.INFORMATION_MODEL))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2023-12-01",
+                        end = "2024-02-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.INFORMATION_MODEL)),
+                    ).validate()
             }
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = "2023-12-01",
-                    end = "2024-02-01",
-                    filters = filters.copy(resourceType = SearchFilter(ResourceType.SERVICE))
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = "2023-12-01",
+                        end = "2024-02-01",
+                        filters = filters.copy(resourceType = SearchFilter(ResourceType.SERVICE)),
+                    ).validate()
             }
         }
 
         @Test
         fun notValidWhenEndDateIsAfterToday() {
             assertThrows<ResponseStatusException> {
-                TIME_SERIES_REQUEST.copy(
-                    start = LocalDate.now().minusDays(7).toString(),
-                    end = LocalDate.now().plusDays(1).toString(),
-                    interval = Interval.DAY
-                ).validate()
+                TIME_SERIES_REQUEST
+                    .copy(
+                        start = LocalDate.now().minusDays(7).toString(),
+                        end = LocalDate.now().plusDays(1).toString(),
+                        interval = Interval.DAY,
+                    ).validate()
             }
         }
     }

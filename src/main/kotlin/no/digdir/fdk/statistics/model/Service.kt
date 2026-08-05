@@ -12,4 +12,3 @@ data class Service(
 data class ServiceOrganization(
     val orgPath: String?,
 )
-

@@ -15,5 +15,5 @@ data class ResourceEventMetrics(
 data class LatestForDate(
     val fdkId: String,
     val calculatedForDate: LocalDate,
-    val statId: String
+    val statId: String,
 )

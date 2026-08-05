@@ -31,9 +31,7 @@ open class KafkaRdfParseEventCircuitBreaker(
     }
 
     @Transactional
-    open fun process(
-        record: ConsumerRecord<String, GenericRecord>
-    ) {
+    open fun process(record: ConsumerRecord<String, GenericRecord>) {
         circuitBreaker.executeRunnable {
             logger.debug("CB Received message - offset: " + record.offset())
 
@@ -45,25 +43,29 @@ open class KafkaRdfParseEventCircuitBreaker(
             val resourceType = event.get("resourceType")?.toString()?.lowercase() ?: ""
 
             try {
-                val timeElapsed = measureTimedValue {
-                    when (resourceType) {
-                        "concept" -> event.parseAndStore(statisticsService::storeConceptMetrics)
-                        "data_service" -> event.parseAndStore(statisticsService::storeDataServiceMetrics)
-                        "dataset" -> event.parseAndStore(statisticsService::storeDatasetMetrics)
-                        "event" -> event.parseAndStore(statisticsService::storeEventMetrics)
-                        "information_model" -> event.parseAndStore(statisticsService::storeInformationModelMetrics)
-                        "service" -> event.parseAndStore(statisticsService::storeServiceMetrics)
-                        else -> logger.debug("unknown rdf parse type")
+                val timeElapsed =
+                    measureTimedValue {
+                        when (resourceType) {
+                            "concept" -> event.parseAndStore(statisticsService::storeConceptMetrics)
+                            "data_service" -> event.parseAndStore(statisticsService::storeDataServiceMetrics)
+                            "dataset" -> event.parseAndStore(statisticsService::storeDatasetMetrics)
+                            "event" -> event.parseAndStore(statisticsService::storeEventMetrics)
+                            "information_model" -> event.parseAndStore(statisticsService::storeInformationModelMetrics)
+                            "service" -> event.parseAndStore(statisticsService::storeServiceMetrics)
+                            else -> logger.debug("unknown rdf parse type")
+                        }
                     }
-                }
-                Metrics.timer("store_resource", "type", resourceType)
+                Metrics
+                    .timer("store_resource", "type", resourceType)
                     .record(timeElapsed.duration.toJavaDuration())
             } catch (e: Exception) {
                 logger.error("Error processing message", e)
-                Metrics.counter(
-                    "store_resource_error",
-                    "type", resourceType
-                ).increment()
+                Metrics
+                    .counter(
+                        "store_resource_error",
+                        "type",
+                        resourceType,
+                    ).increment()
                 throw e
             }
         }

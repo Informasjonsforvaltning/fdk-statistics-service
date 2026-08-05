@@ -11,8 +11,10 @@ import java.time.LocalDate
 
 @Configuration
 @EnableScheduling
-@ConditionalOnProperty(prefix = "scheduling", name=["enabled"], havingValue="true", matchIfMissing = true)
-open class Scheduler(private val statisticsService: StatisticsService) {
+@ConditionalOnProperty(prefix = "scheduling", name = ["enabled"], havingValue = "true", matchIfMissing = true)
+open class Scheduler(
+    private val statisticsService: StatisticsService,
+) {
     private val log = LoggerFactory.getLogger(Scheduler::class.java)
 
     /**
@@ -26,13 +28,12 @@ open class Scheduler(private val statisticsService: StatisticsService) {
         statisticsService.calculateLatest(
             CalculationRequest(
                 startInclusive = yesterday,
-                endExclusive = LocalDate.now()
-            )
+                endExclusive = LocalDate.now(),
+            ),
         )
 
         log.info("Calculation done, clearing time-series cache and init with default requests")
         statisticsService.clearTimeSeriesCache()
         statisticsService.cacheDefaultRequests()
     }
-
 }

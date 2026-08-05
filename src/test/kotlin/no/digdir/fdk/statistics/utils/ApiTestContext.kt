@@ -25,8 +25,11 @@ abstract class ApiTestContext {
     @Autowired
     private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
-    private fun epochMillis(year: String, month: String, day: String): Long =
-        Instant.parse("$year-$month-${day}T12:00:00.00Z").epochSecond.times(1000)
+    private fun epochMillis(
+        year: String,
+        month: String,
+        day: String,
+    ): Long = Instant.parse("$year-$month-${day}T12:00:00.00Z").epochSecond.times(1000)
 
     @BeforeEach
     fun resetDB() {
@@ -68,32 +71,36 @@ abstract class ApiTestContext {
         statisticsService.markResourceAsRemoved("service-0", epochMillis("2024", "06", "11"), ResourceType.SERVICE)
         statisticsService.storeServiceMetrics("service-0", SERVICE_0, epochMillis("2024", "06", "22"))
 
-        statisticsService.calculateLatest(CalculationRequest(
-            startInclusive = LocalDate.of(2023, 5, 1),
-            endExclusive = LocalDate.of(2024, 8, 1))
+        statisticsService.calculateLatest(
+            CalculationRequest(
+                startInclusive = LocalDate.of(2023, 5, 1),
+                endExclusive = LocalDate.of(2024, 8, 1),
+            ),
         )
     }
 
     internal class Initializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
         override fun initialize(configurableApplicationContext: ConfigurableApplicationContext) {
-            TestPropertyValues.of(
-                "spring.datasource.url=jdbc:postgresql://${postgreSQLContainer.host}:${
-                    postgreSQLContainer.getMappedPort(
-                        5432
-                    )
-                }/stat_test",
-                "spring.datasource.username=postgres",
-                "spring.datasource.password=postgres",
-            ).applyTo(configurableApplicationContext.environment)
+            TestPropertyValues
+                .of(
+                    "spring.datasource.url=jdbc:postgresql://${postgreSQLContainer.host}:${
+                        postgreSQLContainer.getMappedPort(
+                            5432,
+                        )
+                    }/stat_test",
+                    "spring.datasource.username=postgres",
+                    "spring.datasource.password=postgres",
+                ).applyTo(configurableApplicationContext.environment)
         }
     }
 
     companion object {
-        val postgreSQLContainer: PostgreSQLContainer<*> = PostgreSQLContainer("postgres:14-alpine")
-            .withExposedPorts(5432)
-            .withUsername("postgres")
-            .withPassword("postgres")
-            .withDatabaseName("stat_test")
+        val postgreSQLContainer: PostgreSQLContainer<*> =
+            PostgreSQLContainer("postgres:14-alpine")
+                .withExposedPorts(5432)
+                .withUsername("postgres")
+                .withPassword("postgres")
+                .withDatabaseName("stat_test")
 
         init {
             postgreSQLContainer.start()

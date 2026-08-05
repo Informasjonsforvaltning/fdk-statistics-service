@@ -8,16 +8,17 @@ import org.springframework.stereotype.Component
 
 @Component
 class KafkaRdfParseEventConsumer(
-    private val kafkaRdfParseEventCircuitBreaker: KafkaRdfParseEventCircuitBreaker
+    private val kafkaRdfParseEventCircuitBreaker: KafkaRdfParseEventCircuitBreaker,
 ) {
-
     @KafkaListener(
         topics = ["rdf-parse-events"],
         groupId = "fdk-statistics-service",
         containerFactory = "kafkaListenerContainerFactory",
         concurrency = "4",
-        id = "rdf-parse"
+        id = "rdf-parse",
     )
-    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) =
-        ack.acknowledgeOrNack { kafkaRdfParseEventCircuitBreaker.process(record) }
+    fun listen(
+        record: ConsumerRecord<String, GenericRecord>,
+        ack: Acknowledgment,
+    ) = ack.acknowledgeOrNack { kafkaRdfParseEventCircuitBreaker.process(record) }
 }

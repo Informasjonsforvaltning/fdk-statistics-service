@@ -21,12 +21,14 @@ import org.springframework.web.server.ResponseStatusException
 @RequestMapping(produces = ["application/json"])
 class StatisticsController(
     private val statisticsService: StatisticsService,
-    private val endpointPermissions: EndpointPermissions
+    private val endpointPermissions: EndpointPermissions,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(StatisticsController::class.java)
 
     @PostMapping(value = ["/time-series"])
-    fun timeSeries(@RequestBody req: TimeSeriesRequest): ResponseEntity<List<TimeSeriesPoint>>  =
+    fun timeSeries(
+        @RequestBody req: TimeSeriesRequest,
+    ): ResponseEntity<List<TimeSeriesPoint>> =
         try {
             ResponseEntity(statisticsService.timeSeries(req), HttpStatus.OK)
         } catch (ex: ResponseStatusException) {
@@ -37,7 +39,7 @@ class StatisticsController(
     @PostMapping(value = ["/calculate-latest"])
     fun calculateLatest(
         @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody req: CalculationRequest
+        @RequestBody req: CalculationRequest,
     ): ResponseEntity<Unit> =
         if (endpointPermissions.hasAdminPermission(jwt)) {
             try {
@@ -47,6 +49,7 @@ class StatisticsController(
                 logger.debug("Calculate latest failed with code {} and reason {}", ex.statusCode, ex.reason)
                 ResponseEntity(ex.statusCode)
             }
-        } else ResponseEntity(HttpStatus.FORBIDDEN)
-
+        } else {
+            ResponseEntity(HttpStatus.FORBIDDEN)
+        }
 }
