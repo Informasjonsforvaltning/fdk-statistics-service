@@ -48,41 +48,14 @@ open class KafkaRemovedEventCircuitBreaker(
                     val fdkId = event.get("fdkId")?.toString() ?: return@measureTimedValue false
                     val timestamp = (event.get("timestamp") as? Number)?.toLong() ?: return@measureTimedValue false
 
-                    when (event.getResourceType() to eventType) {
-                        "concept" to "CONCEPT_REMOVED" -> {
-                            logger.debug("Remove concept - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.CONCEPT)
-                            true
-                        }
-                        "data-service" to "DATA_SERVICE_REMOVED" -> {
-                            logger.debug("Remove data service - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.DATA_SERVICE)
-                            true
-                        }
-                        "dataset" to "DATASET_REMOVED" -> {
-                            logger.debug("Remove dataset - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.DATASET)
-                            true
-                        }
-                        "event" to "EVENT_REMOVED" -> {
-                            logger.debug("Remove event - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.EVENT)
-                            true
-                        }
-                        "information-model" to "INFORMATION_MODEL_REMOVED" -> {
-                            logger.debug("Remove information model - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.INFORMATION_MODEL)
-                            true
-                        }
-                        "service" to "SERVICE_REMOVED" -> {
-                            logger.debug("Remove service - id: {}", fdkId)
-                            statisticsService.markResourceAsRemoved(fdkId, timestamp, ResourceType.SERVICE)
-                            true
-                        }
-                        else -> {
-                            logger.debug("Unknown event type: {} / {}, skipping", event.getResourceType(), eventType)
-                            false
-                        }
+                    val resourceType = REMOVED_EVENT_TYPES[event.getResourceType() to eventType]
+                    if (resourceType != null) {
+                        logger.debug("Remove {} - id: {}", resourceType, fdkId)
+                        statisticsService.markResourceAsRemoved(fdkId, timestamp, resourceType)
+                        true
+                    } else {
+                        logger.debug("Unknown event type: {} / {}, skipping", event.getResourceType(), eventType)
+                        false
                     }
                 }
 
@@ -103,5 +76,15 @@ open class KafkaRemovedEventCircuitBreaker(
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(KafkaRemovedEventCircuitBreaker::class.java)
+
+        // Maps (resource type, avro event type) pairs to the corresponding ResourceType
+        private val REMOVED_EVENT_TYPES: Map<Pair<String, String>, ResourceType> = mapOf(
+            ("concept" to "CONCEPT_REMOVED") to ResourceType.CONCEPT,
+            ("data-service" to "DATA_SERVICE_REMOVED") to ResourceType.DATA_SERVICE,
+            ("dataset" to "DATASET_REMOVED") to ResourceType.DATASET,
+            ("event" to "EVENT_REMOVED") to ResourceType.EVENT,
+            ("information-model" to "INFORMATION_MODEL_REMOVED") to ResourceType.INFORMATION_MODEL,
+            ("service" to "SERVICE_REMOVED") to ResourceType.SERVICE,
+        )
     }
 }
