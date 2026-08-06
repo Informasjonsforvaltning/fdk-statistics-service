@@ -11,21 +11,21 @@ import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableCaching
-open class CacheConfig {
+class CacheConfig {
     @Bean
-    open fun caffeineConfig(): Caffeine<Any, Any> =
+    fun caffeineConfig(): Caffeine<Any, Any> =
         Caffeine
             .newBuilder()
             .maximumSize(10000)
             .expireAfterWrite(1, TimeUnit.DAYS)
 
     @Bean
-    open fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
+    fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
         val caffeineCacheManager = CaffeineCacheManager()
         caffeineCacheManager.setCaffeine(caffeine)
         return caffeineCacheManager
     }
 
     @Bean("timeSeriesKeyGenerator")
-    open fun keyGenerator(): KeyGenerator = TimeSeriesKeyGenerator()
+    fun keyGenerator(): KeyGenerator = TimeSeriesKeyGenerator()
 }

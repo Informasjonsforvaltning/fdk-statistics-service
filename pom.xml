@@ -301,8 +301,18 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
                 <configuration>
                     <jvmTarget>${java.release}</jvmTarget>
+                    <compilerPlugins>
+                        <plugin>spring</plugin>
+                    </compilerPlugins>
                 </configuration>
             </plugin>
 
@@ -389,9 +399,8 @@
                 <version>3.7.1</version>
                 <executions>
                     <execution>
-                        <id>format-and-check</id>
+                        <id>check</id>
                         <goals>
-                            <goal>format</goal>
                             <goal>check</goal>
                         </goals>
                     </execution>
