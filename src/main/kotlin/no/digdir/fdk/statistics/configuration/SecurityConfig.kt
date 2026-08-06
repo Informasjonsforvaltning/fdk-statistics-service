@@ -20,12 +20,12 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.web.cors.CorsConfiguration
 
 @Configuration
-open class SecurityConfig(
+class SecurityConfig(
     @param:Value("\${application.cors.originPatterns}")
     val corsOriginPatterns: Array<String>,
 ) {
     @Bean
-    open fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .cors { cors ->
                 cors.configurationSource { _ ->
@@ -54,12 +54,20 @@ open class SecurityConfig(
     }
 
     @Bean
-    open fun jwtDecoder(properties: OAuth2ResourceServerProperties): JwtDecoder? {
-        val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(properties.jwt.jwkSetUri!!).build()
+    fun jwtDecoder(properties: OAuth2ResourceServerProperties): JwtDecoder? {
+        val jwkSetUri =
+            requireNotNull(properties.jwt.jwkSetUri) {
+                "spring.security.oauth2.resourceserver.jwt.jwk-set-uri is required"
+            }
+        val issuerUri =
+            requireNotNull(properties.jwt.issuerUri) {
+                "spring.security.oauth2.resourceserver.jwt.issuer-uri is required"
+            }
+        val jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build()
         jwtDecoder.setJwtValidator(
             DelegatingOAuth2TokenValidator(
                 JwtTimestampValidator(),
-                JwtIssuerValidator(properties.jwt.issuerUri!!),
+                JwtIssuerValidator(issuerUri),
                 JwtClaimValidator(AUD) { aud: List<String> -> aud.contains("fdk-harvest-admin") },
             ),
         )

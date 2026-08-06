@@ -13,11 +13,11 @@ import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
 @Configuration
-open class CircuitBreakerConsumerConfig(
+class CircuitBreakerConsumerConfig(
     private val kafkaManager: KafkaManager,
 ) {
     @Bean
-    open fun circuitBreakerRegistry(): CircuitBreakerRegistry {
+    fun circuitBreakerRegistry(): CircuitBreakerRegistry {
         val defaultConfig =
             CircuitBreakerConfig
                 .custom()
@@ -78,11 +78,10 @@ open class CircuitBreakerConsumerConfig(
     }
 
     @Bean
-    open fun rdfParseCircuitBreaker(registry: CircuitBreakerRegistry): CircuitBreaker =
-        registry.circuitBreaker(RDF_PARSE_CIRCUIT_BREAKER_ID)
+    fun rdfParseCircuitBreaker(registry: CircuitBreakerRegistry): CircuitBreaker = registry.circuitBreaker(RDF_PARSE_CIRCUIT_BREAKER_ID)
 
     @Bean
-    open fun removeCircuitBreaker(registry: CircuitBreakerRegistry): CircuitBreaker = registry.circuitBreaker(REMOVE_CIRCUIT_BREAKER_ID)
+    fun removeCircuitBreaker(registry: CircuitBreakerRegistry): CircuitBreaker = registry.circuitBreaker(REMOVE_CIRCUIT_BREAKER_ID)
 
     companion object {
         private val logger: Logger = LoggerFactory.getLogger(CircuitBreakerConsumerConfig::class.java)

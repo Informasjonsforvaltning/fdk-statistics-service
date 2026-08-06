@@ -15,12 +15,12 @@ import kotlin.jvm.java
 
 @EnableKafka
 @Configuration
-open class KafkaConsumerConfig(
+class KafkaConsumerConfig(
     @param:Value("\${spring.kafka.bootstrap-servers}") private val bootstrapServers: String,
     @param:Value("\${spring.kafka.consumer.properties.schema.registry.url}") private val schemaRegistryUrl: String,
 ) {
     @Bean
-    open fun consumerFactory(): ConsumerFactory<String, Any> {
+    fun consumerFactory(): ConsumerFactory<String, Any> {
         val props: MutableMap<String, Any> = HashMap()
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = bootstrapServers
         props[ConsumerConfig.GROUP_ID_CONFIG] = "fdk-statistics-service"
@@ -33,7 +33,7 @@ open class KafkaConsumerConfig(
     }
 
     @Bean
-    open fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
+    fun kafkaListenerContainerFactory(): ConcurrentKafkaListenerContainerFactory<String, Any> {
         val factory = ConcurrentKafkaListenerContainerFactory<String, Any>()
         factory.setConsumerFactory(consumerFactory())
         factory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL
