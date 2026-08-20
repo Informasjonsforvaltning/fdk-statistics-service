@@ -5,12 +5,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Organization(
-    val orgPath: String?,
-)
+data class Organization(val orgPath: String?)
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Catalog(
-    val publisher: Organization?,
-)
+data class Catalog(val publisher: Organization?)

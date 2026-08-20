@@ -7,9 +7,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
-class KafkaRdfParseEventConsumer(
-    private val kafkaRdfParseEventCircuitBreaker: KafkaRdfParseEventCircuitBreaker,
-) {
+class KafkaRdfParseEventConsumer(private val kafkaRdfParseEventCircuitBreaker: KafkaRdfParseEventCircuitBreaker) {
     @KafkaListener(
         topics = ["rdf-parse-events"],
         groupId = "fdk-statistics-service",
@@ -17,8 +15,6 @@ class KafkaRdfParseEventConsumer(
         concurrency = "4",
         id = "rdf-parse",
     )
-    fun listen(
-        record: ConsumerRecord<String, GenericRecord>,
-        ack: Acknowledgment,
-    ) = ack.acknowledgeOrNack { kafkaRdfParseEventCircuitBreaker.process(record) }
+    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) =
+        ack.acknowledgeOrNack { kafkaRdfParseEventCircuitBreaker.process(record) }
 }

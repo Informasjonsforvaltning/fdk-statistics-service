@@ -13,9 +13,7 @@ import org.springframework.context.annotation.Configuration
 import java.time.Duration
 
 @Configuration
-class CircuitBreakerConsumerConfig(
-    private val kafkaManager: KafkaManager,
-) {
+class CircuitBreakerConsumerConfig(private val kafkaManager: KafkaManager) {
     @Bean
     fun circuitBreakerRegistry(): CircuitBreakerRegistry {
         val defaultConfig =
@@ -35,11 +33,7 @@ class CircuitBreakerConsumerConfig(
         return registry
     }
 
-    private fun attachListener(
-        registry: CircuitBreakerRegistry,
-        breakerId: String,
-        listenerId: String,
-    ) {
+    private fun attachListener(registry: CircuitBreakerRegistry, breakerId: String, listenerId: String) {
         registry
             .circuitBreaker(breakerId)
             .eventPublisher
@@ -48,10 +42,7 @@ class CircuitBreakerConsumerConfig(
             }
     }
 
-    private fun handleStateTransition(
-        event: CircuitBreakerOnStateTransitionEvent,
-        listenerId: String,
-    ) {
+    private fun handleStateTransition(event: CircuitBreakerOnStateTransitionEvent, listenerId: String) {
         logger.debug("Handling state transition in circuit breaker {}", event)
         when (event.stateTransition) {
             StateTransition.CLOSED_TO_OPEN,

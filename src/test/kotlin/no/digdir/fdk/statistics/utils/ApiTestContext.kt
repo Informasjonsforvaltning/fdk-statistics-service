@@ -25,11 +25,8 @@ abstract class ApiTestContext {
     @Autowired
     private lateinit var jdbcTemplate: NamedParameterJdbcTemplate
 
-    private fun epochMillis(
-        year: String,
-        month: String,
-        day: String,
-    ): Long = Instant.parse("$year-$month-${day}T12:00:00.00Z").epochSecond.times(1000)
+    private fun epochMillis(year: String, month: String, day: String): Long =
+        Instant.parse("$year-$month-${day}T12:00:00.00Z").epochSecond.times(1000)
 
     @BeforeEach
     fun resetDB() {

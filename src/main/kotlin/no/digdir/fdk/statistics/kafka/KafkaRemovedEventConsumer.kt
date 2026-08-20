@@ -7,9 +7,7 @@ import org.springframework.kafka.support.Acknowledgment
 import org.springframework.stereotype.Component
 
 @Component
-class KafkaRemovedEventConsumer(
-    private val kafkaRemovedEventCircuitBreaker: KafkaRemovedEventCircuitBreaker,
-) {
+class KafkaRemovedEventConsumer(private val kafkaRemovedEventCircuitBreaker: KafkaRemovedEventCircuitBreaker) {
     @KafkaListener(
         topics = [
             "dataset-events",
@@ -24,8 +22,6 @@ class KafkaRemovedEventConsumer(
         containerFactory = "kafkaListenerContainerFactory",
         id = "remove",
     )
-    fun listen(
-        record: ConsumerRecord<String, GenericRecord>,
-        ack: Acknowledgment,
-    ) = ack.acknowledgeOrNack { kafkaRemovedEventCircuitBreaker.process(record) }
+    fun listen(record: ConsumerRecord<String, GenericRecord>, ack: Acknowledgment) =
+        ack.acknowledgeOrNack { kafkaRemovedEventCircuitBreaker.process(record) }
 }

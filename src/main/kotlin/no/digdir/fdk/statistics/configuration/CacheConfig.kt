@@ -13,11 +13,10 @@ import java.util.concurrent.TimeUnit
 @EnableCaching
 class CacheConfig {
     @Bean
-    fun caffeineConfig(): Caffeine<Any, Any> =
-        Caffeine
-            .newBuilder()
-            .maximumSize(10000)
-            .expireAfterWrite(1, TimeUnit.DAYS)
+    fun caffeineConfig(): Caffeine<Any, Any> = Caffeine
+        .newBuilder()
+        .maximumSize(10000)
+        .expireAfterWrite(1, TimeUnit.DAYS)
 
     @Bean
     fun cacheManager(caffeine: Caffeine<Any, Any>): CacheManager {
