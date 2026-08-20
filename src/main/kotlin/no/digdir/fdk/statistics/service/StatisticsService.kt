@@ -26,10 +26,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 @Component
-class StatisticsService(
-    private val statisticsRepository: StatisticsRepository,
-    private val cacheManager: CacheManager,
-) {
+class StatisticsService(private val statisticsRepository: StatisticsRepository, private val cacheManager: CacheManager) {
     private val logger: Logger = LoggerFactory.getLogger(StatisticsService::class.java)
 
     fun clearTimeSeriesCache() {
@@ -59,23 +56,13 @@ class StatisticsService(
         )
     }
 
-    fun storeConceptMetrics(
-        fdkId: String,
-        concept: Concept,
-        timestamp: Long,
-    ) = storeMetrics(fdkId, timestamp, ResourceType.CONCEPT, concept.publisher?.orgPath)
+    fun storeConceptMetrics(fdkId: String, concept: Concept, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.CONCEPT, concept.publisher?.orgPath)
 
-    fun storeDataServiceMetrics(
-        fdkId: String,
-        dataService: DataService,
-        timestamp: Long,
-    ) = storeMetrics(fdkId, timestamp, ResourceType.DATA_SERVICE, dataService.publisher?.orgPath)
+    fun storeDataServiceMetrics(fdkId: String, dataService: DataService, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.DATA_SERVICE, dataService.publisher?.orgPath)
 
-    fun storeDatasetMetrics(
-        fdkId: String,
-        dataset: Dataset,
-        timestamp: Long,
-    ) = storeMetrics(
+    fun storeDatasetMetrics(fdkId: String, dataset: Dataset, timestamp: Long) = storeMetrics(
         fdkId,
         timestamp,
         ResourceType.DATASET,
@@ -83,36 +70,23 @@ class StatisticsService(
         isRelatedToTransportportal = dataset.isRelatedToTransportportal ?: false,
     )
 
-    fun storeEventMetrics(
-        fdkId: String,
-        event: Event,
-        timestamp: Long,
-    ) = storeMetrics(fdkId, timestamp, ResourceType.EVENT, event.catalog?.publisher?.orgPath)
+    fun storeEventMetrics(fdkId: String, event: Event, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.EVENT, event.catalog?.publisher?.orgPath)
 
-    fun storeInformationModelMetrics(
-        fdkId: String,
-        informationModel: InformationModel,
-        timestamp: Long,
-    ) = storeMetrics(fdkId, timestamp, ResourceType.INFORMATION_MODEL, informationModel.publisher?.orgPath)
+    fun storeInformationModelMetrics(fdkId: String, informationModel: InformationModel, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.INFORMATION_MODEL, informationModel.publisher?.orgPath)
 
-    fun storeServiceMetrics(
-        fdkId: String,
-        service: Service,
-        timestamp: Long,
-    ) = storeMetrics(fdkId, timestamp, ResourceType.SERVICE, service.orgPath())
+    fun storeServiceMetrics(fdkId: String, service: Service, timestamp: Long) =
+        storeMetrics(fdkId, timestamp, ResourceType.SERVICE, service.orgPath())
 
-    private fun Service.orgPath(): String? =
-        when {
-            !hasCompetentAuthority.isNullOrEmpty() -> hasCompetentAuthority.first().orgPath
-            !ownedBy.isNullOrEmpty() -> ownedBy.first().orgPath
-            else -> null
-        }
+    private fun Service.orgPath(): String? = when {
+        !hasCompetentAuthority.isNullOrEmpty() -> hasCompetentAuthority.first().orgPath
+        !ownedBy.isNullOrEmpty() -> ownedBy.first().orgPath
+        else -> null
+    }
 
-    fun markResourceAsRemoved(
-        fdkId: String,
-        timestamp: Long,
-        resourceType: ResourceType,
-    ) = storeMetrics(fdkId, timestamp, resourceType, orgPath = null, removed = true)
+    fun markResourceAsRemoved(fdkId: String, timestamp: Long, resourceType: ResourceType) =
+        storeMetrics(fdkId, timestamp, resourceType, orgPath = null, removed = true)
 
     fun calculateLatest(req: CalculationRequest) {
         logger.info("Starting calculation of latest metrics for period between {} and {}", req.startInclusive, req.endExclusive)
@@ -122,10 +96,9 @@ class StatisticsService(
             .forEach { date -> calculateLatestForDate(date) }
     }
 
-    private fun LocalDate.toMillis(): Long =
-        atStartOfDay()
-            .toInstant(ZoneOffset.UTC)
-            .toEpochMilli()
+    private fun LocalDate.toMillis(): Long = atStartOfDay()
+        .toInstant(ZoneOffset.UTC)
+        .toEpochMilli()
 
     private fun calculateLatestForDate(date: LocalDate) {
         statisticsRepository
@@ -172,11 +145,11 @@ class StatisticsService(
                     end = firstOfThisMonth,
                     interval = Interval.MONTH,
                     filters =
-                        TimeSeriesFilters(
-                            resourceType = SearchFilter(value = type),
-                            orgPath = null,
-                            transport = null,
-                        ),
+                    TimeSeriesFilters(
+                        resourceType = SearchFilter(value = type),
+                        orgPath = null,
+                        transport = null,
+                    ),
                 )
 
             statisticsRepository.timeSeries(req)
@@ -184,11 +157,10 @@ class StatisticsService(
         }
     }
 
-    private fun TimeSeriesRequest.addTransportFilter() =
-        copy(
-            filters =
-                filters?.copy(
-                    transport = SearchFilter(value = true),
-                ),
-        )
+    private fun TimeSeriesRequest.addTransportFilter() = copy(
+        filters =
+        filters?.copy(
+            transport = SearchFilter(value = true),
+        ),
+    )
 }

@@ -80,10 +80,9 @@ fun TimeSeriesRequest.validate() {
 
 private fun ResourceType.readableName(): String = name.lowercase().replace('_', ' ')
 
-private fun String.isISODate(): Boolean =
-    try {
-        DateTimeFormatter.ISO_LOCAL_DATE.parse(this)
-        true
-    } catch (ex: DateTimeParseException) {
-        false
-    }
+private fun String.isISODate(): Boolean = try {
+    DateTimeFormatter.ISO_LOCAL_DATE.parse(this)
+    true
+} catch (ex: DateTimeParseException) {
+    false
+}

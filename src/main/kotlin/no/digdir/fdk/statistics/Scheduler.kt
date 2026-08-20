@@ -12,9 +12,7 @@ import java.time.LocalDate
 @Configuration
 @EnableScheduling
 @ConditionalOnProperty(prefix = "scheduling", name = ["enabled"], havingValue = "true", matchIfMissing = true)
-open class Scheduler(
-    private val statisticsService: StatisticsService,
-) {
+open class Scheduler(private val statisticsService: StatisticsService) {
     private val log = LoggerFactory.getLogger(Scheduler::class.java)
 
     /**

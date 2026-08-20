@@ -19,28 +19,19 @@ import org.springframework.web.server.ResponseStatusException
 
 @RestController
 @RequestMapping(produces = ["application/json"])
-class StatisticsController(
-    private val statisticsService: StatisticsService,
-    private val endpointPermissions: EndpointPermissions,
-) {
+class StatisticsController(private val statisticsService: StatisticsService, private val endpointPermissions: EndpointPermissions) {
     private val logger: Logger = LoggerFactory.getLogger(StatisticsController::class.java)
 
     @PostMapping(value = ["/time-series"])
-    fun timeSeries(
-        @RequestBody req: TimeSeriesRequest,
-    ): ResponseEntity<List<TimeSeriesPoint>> =
-        try {
-            ResponseEntity(statisticsService.timeSeries(req), HttpStatus.OK)
-        } catch (ex: ResponseStatusException) {
-            logger.debug("Time series failed with code {} and reason {}", ex.statusCode, ex.reason)
-            ResponseEntity(ex.statusCode)
-        }
+    fun timeSeries(@RequestBody req: TimeSeriesRequest): ResponseEntity<List<TimeSeriesPoint>> = try {
+        ResponseEntity(statisticsService.timeSeries(req), HttpStatus.OK)
+    } catch (ex: ResponseStatusException) {
+        logger.debug("Time series failed with code {} and reason {}", ex.statusCode, ex.reason)
+        ResponseEntity(ex.statusCode)
+    }
 
     @PostMapping(value = ["/calculate-latest"])
-    fun calculateLatest(
-        @AuthenticationPrincipal jwt: Jwt,
-        @RequestBody req: CalculationRequest,
-    ): ResponseEntity<Unit> =
+    fun calculateLatest(@AuthenticationPrincipal jwt: Jwt, @RequestBody req: CalculationRequest): ResponseEntity<Unit> =
         if (endpointPermissions.hasAdminPermission(jwt)) {
             try {
                 statisticsService.calculateLatest(req)

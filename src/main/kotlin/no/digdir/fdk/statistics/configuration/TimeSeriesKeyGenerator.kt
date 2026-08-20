@@ -7,11 +7,7 @@ import java.util.UUID
 // This generator should only be used with the cacheable method timeSeries in StatisticsRepository,
 // where the first parameter is the data class TimeSeriesRequest
 class TimeSeriesKeyGenerator : KeyGenerator {
-    override fun generate(
-        target: Any,
-        method: Method,
-        vararg params: Any?,
-    ): Any {
+    override fun generate(target: Any, method: Method, vararg params: Any?): Any {
         val bytes =
             runCatching { params[0].toString().toByteArray() }
                 .getOrElse { byteArrayOf() }

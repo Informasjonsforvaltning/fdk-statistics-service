@@ -4,9 +4,7 @@ import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
 import java.util.Date
 
-class JwtToken(
-    private val access: Access,
-) {
+class JwtToken(private val access: Access) {
     private val exp = Date().time + 120 * 1000
     private val aud = listOf("fdk-harvest-admin")
 
@@ -33,9 +31,7 @@ class JwtToken(
     override fun toString(): String = buildToken()
 }
 
-enum class Access(
-    val authorities: String,
-) {
+enum class Access(val authorities: String) {
     ORG_WRITE("organization:333222111:admin"),
     ROOT("system:root:admin"),
 }

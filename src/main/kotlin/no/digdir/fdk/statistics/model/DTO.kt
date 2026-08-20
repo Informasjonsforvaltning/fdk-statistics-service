@@ -14,12 +14,7 @@ enum class Interval {
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class TimeSeriesRequest(
-    val start: String,
-    val end: String,
-    val interval: Interval,
-    val filters: TimeSeriesFilters?,
-)
+data class TimeSeriesRequest(val start: String, val end: String, val interval: Interval, val filters: TimeSeriesFilters?)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class TimeSeriesFilters(
@@ -29,9 +24,7 @@ data class TimeSeriesFilters(
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class SearchFilter<T>(
-    val value: T,
-)
+data class SearchFilter<T>(val value: T)
 
 data class CalculationRequest(
     @param:JsonSerialize(using = LocalDateSerializer::class)

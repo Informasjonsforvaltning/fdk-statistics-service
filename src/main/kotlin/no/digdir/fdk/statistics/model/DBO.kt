@@ -12,8 +12,4 @@ data class ResourceEventMetrics(
     val isRelatedToTransportportal: Boolean = false,
 )
 
-data class LatestForDate(
-    val fdkId: String,
-    val calculatedForDate: LocalDate,
-    val statId: String,
-)
+data class LatestForDate(val fdkId: String, val calculatedForDate: LocalDate, val statId: String)

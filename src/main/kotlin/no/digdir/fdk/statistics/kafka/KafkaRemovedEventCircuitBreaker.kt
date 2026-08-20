@@ -20,16 +20,15 @@ open class KafkaRemovedEventCircuitBreaker(
     @param:Qualifier("removeCircuitBreaker")
     private val circuitBreaker: CircuitBreaker,
 ) {
-    private fun GenericRecord.getResourceType(): String =
-        when (schema?.fullName) {
-            "no.fdk.dataset.DatasetEvent" -> "dataset"
-            "no.fdk.dataservice.DataServiceEvent" -> "data-service"
-            "no.fdk.concept.ConceptEvent" -> "concept"
-            "no.fdk.informationmodel.InformationModelEvent" -> "information-model"
-            "no.fdk.service.ServiceEvent" -> "service"
-            "no.fdk.event.EventEvent" -> "event"
-            else -> "invalid-type"
-        }
+    private fun GenericRecord.getResourceType(): String = when (schema?.fullName) {
+        "no.fdk.dataset.DatasetEvent" -> "dataset"
+        "no.fdk.dataservice.DataServiceEvent" -> "data-service"
+        "no.fdk.concept.ConceptEvent" -> "concept"
+        "no.fdk.informationmodel.InformationModelEvent" -> "information-model"
+        "no.fdk.service.ServiceEvent" -> "service"
+        "no.fdk.event.EventEvent" -> "event"
+        else -> "invalid-type"
+    }
 
     @Transactional
     open fun process(record: ConsumerRecord<String, GenericRecord>) {

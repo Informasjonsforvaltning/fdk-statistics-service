@@ -107,11 +107,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.CONCEPT),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.CONCEPT),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -142,11 +142,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.DATA_SERVICE),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.DATA_SERVICE),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -176,11 +176,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.DATASET),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.DATASET),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -209,11 +209,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.EVENT),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.EVENT),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -241,11 +241,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.INFORMATION_MODEL),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.INFORMATION_MODEL),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -272,11 +272,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = SearchFilter(ResourceType.SERVICE),
-                                    orgPath = null,
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = SearchFilter(ResourceType.SERVICE),
+                                orgPath = null,
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -305,11 +305,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = null,
-                                    orgPath = SearchFilter("/PRIVAT/987654321"),
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = null,
+                                orgPath = SearchFilter("/PRIVAT/987654321"),
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -340,11 +340,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = null,
-                                    orgPath = SearchFilter("/STAT"),
-                                    transport = null,
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = null,
+                                orgPath = SearchFilter("/STAT"),
+                                transport = null,
+                            ),
                         ),
                     ),
                     POST,
@@ -378,11 +378,11 @@ class TimeSeriesTest : ApiTestContext() {
                     mapper.writeValueAsString(
                         TIME_SERIES_REQUEST.copy(
                             filters =
-                                TimeSeriesFilters(
-                                    resourceType = null,
-                                    orgPath = null,
-                                    transport = SearchFilter(true),
-                                ),
+                            TimeSeriesFilters(
+                                resourceType = null,
+                                orgPath = null,
+                                transport = SearchFilter(true),
+                            ),
                         ),
                     ),
                     POST,
